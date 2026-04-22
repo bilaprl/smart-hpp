@@ -1,0 +1,904 @@
+import { supabase } from '../lib/supabase';
+import { useState } from "react";
+
+const TableGroup = ({
+  type,
+  title,
+  desc,
+  colName,
+  rows,
+  units,
+  labels,
+  updateRow,
+  removeRow,
+  getRowCost,
+  formatRp,
+  addRow,
+}) => {
+  const iconColor =
+    type === "main"
+      ? "text-smart-lime"
+      : type === "labor"
+        ? "text-blue-500"
+        : "text-purple-500";
+  const iconName =
+    type === "main"
+      ? "inventory_2"
+      : type === "labor"
+        ? "engineering"
+        : "receipt_long";
+
+  const saveProduct = async () => {
+    const { data, error } = await supabase.from("products").insert([
+      {
+        nama_produk: productName,
+        hpp_per_unit: totalHppPerUnit,
+        harga_jual: Number(sellingPrice),
+        yield_qty: yieldQty,
+      },
+    ]);
+    if (!error) alert("Data HPP Tersimpan ke Database!");
+  };
+
+  return (
+    <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
+      <div className="mb-6 border-b border-smart-border pb-4">
+        <h3 className="font-montserrat font-bold text-lg text-smart-text flex items-center gap-2">
+          <span className={`material-icons-round ${iconColor}`}>
+            {iconName}
+          </span>
+          {title}
+        </h3>
+        <p className="text-smart-text-muted text-sm mt-1 ml-8">{desc}</p>
+      </div>
+
+      <div className="overflow-x-auto pb-4">
+        <table className="w-full text-left text-sm min-w-[900px]">
+          <thead>
+            <tr className="text-smart-text-muted border-b border-smart-border/80 text-[11px] uppercase tracking-wider">
+              <th className="pb-4 font-semibold w-[22%]">{colName}</th>
+              <th className="pb-4 font-semibold w-[18%]">{labels.price}</th>
+              <th className="pb-4 font-semibold w-[15%]">{labels.vol}</th>
+              <th className="pb-4 font-semibold w-[12%]">{labels.unit}</th>
+              <th className="pb-4 font-semibold w-[15%] text-smart-lime">
+                {labels.qty}
+              </th>
+              <th className="pb-4 font-semibold w-[15%]">Biaya HPP</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-smart-border/50">
+            {rows.map((row) => {
+              const unitPrice =
+                (Number(row.totalPrice) || 0) /
+                (Number(row.totalVolume) > 0 ? Number(row.totalVolume) : 1);
+              return (
+                <tr
+                  key={row.id}
+                  className="group transition-colors hover:bg-smart-border/30"
+                >
+                  <td className="py-4 pr-2">
+                    <input
+                      type="text"
+                      placeholder="Ketik nama item..."
+                      value={row.name}
+                      onChange={(e) =>
+                        updateRow(type, row.id, "name", e.target.value)
+                      }
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
+                    />
+                  </td>
+                  <td className="py-4 pr-2 relative">
+                    <span className="absolute left-3 top-6 text-smart-text-muted text-xs font-bold">
+                      Rp
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={row.totalPrice}
+                      onChange={(e) =>
+                        updateRow(type, row.id, "totalPrice", e.target.value)
+                      }
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg pl-8 pr-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
+                    />
+                  </td>
+                  <td className="py-4 pr-2 relative">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Total"
+                      value={row.totalVolume}
+                      onChange={(e) =>
+                        updateRow(type, row.id, "totalVolume", e.target.value)
+                      }
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all pr-8"
+                    />
+                  </td>
+                  <td className="py-4 pr-2">
+                    <div className="relative">
+                      <select
+                        value={row.unit}
+                        onChange={(e) =>
+                          updateRow(type, row.id, "unit", e.target.value)
+                        }
+                        className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all appearance-none cursor-pointer"
+                      >
+                        {units.map((u) => (
+                          <option key={u} value={u}>
+                            {u}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="material-icons-round absolute right-1 top-2.5 text-smart-text-muted pointer-events-none text-lg">
+                        arrow_drop_down
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 pr-2 relative">
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={row.recipeQty}
+                      onChange={(e) =>
+                        updateRow(type, row.id, "recipeQty", e.target.value)
+                      }
+                      className="w-full bg-smart-lime/10 border border-smart-lime/50 rounded-lg px-3 py-2.5 text-sm text-smart-lime font-bold focus:border-smart-lime outline-none transition-all placeholder-smart-lime/30 pr-8"
+                    />
+                    <span className="absolute right-4 top-6 text-smart-lime/60 text-[10px] font-bold uppercase pointer-events-none">
+                      {row.unit}
+                    </span>
+                  </td>
+                  <td className="py-4 pr-2">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm text-smart-text">
+                        {formatRp(getRowCost(row))}
+                      </span>
+                      <span className="text-[10px] text-smart-text-muted font-medium">
+                        @ {formatRp(unitPrice)} / {row.unit}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 text-right">
+                    <button
+                      onClick={() => removeRow(type, row.id)}
+                      className="text-smart-text-muted hover:text-red-500 p-2 rounded-lg transition-colors"
+                      title="Hapus Baris"
+                    >
+                      <span className="material-icons-round text-lg">
+                        delete_outline
+                      </span>
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <button
+        onClick={() => addRow(type)}
+        className="mt-2 bg-smart-bg border border-dashed border-smart-text-muted text-sm font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 hover:border-smart-lime hover:text-smart-lime text-smart-text transition-colors w-full sm:w-auto justify-center"
+      >
+        <span className="material-icons-round text-sm">add</span> Tambah Baris
+      </button>
+    </div>
+  );
+};
+
+// =========================================================================
+// KOMPONEN UTAMA
+// =========================================================================
+export default function HppSection({ isLoggedIn = false, openModal }) {
+  const [businessType, setBusinessType] = useState("produksi");
+
+  const [yieldQty, setYieldQty] = useState(1);
+  const [yieldUnit, setYieldUnit] = useState("Porsi");
+  const [productName, setProductName] = useState("");
+
+  const typeConfig = {
+    produksi: {
+      inputPlaceholder: "Cth: Kopi Susu Gula Aren (Resep 1 Panci)",
+      mainTitle: "1. Bahan Baku Langsung (Direct Material)",
+      laborTitle: "2. Tenaga Kerja Langsung (Direct Labor)",
+      otherTitle: "3. Biaya Overhead & Kemasan",
+      mainDesc: "Komponen fisik produk (Tepung, Kopi, Daging).",
+      laborDesc: "Gaji perajin/tukang masak yang mengerjakan resep ini.",
+      otherDesc: "Biaya utilitas (Gas, Listrik) dan Kemasan (Box, Plastik).",
+      mainCol: "Nama Bahan Baku",
+      laborCol: "Peran Pekerja",
+      otherCol: "Nama Biaya Overhead",
+      mainUnits: ["gr", "ml", "pcs"],
+      laborUnits: ["jam", "menit", "hari", "orang"],
+      otherUnits: ["pcs", "pack", "ml", "kwh"],
+      mainLabels: {
+        price: "Harga Beli (Nota)",
+        vol: "Isi Kemasan Total",
+        unit: "Satuan Dasar",
+        qty: "Takaran Resep",
+      },
+      laborLabels: {
+        price: "Total Upah / Gaji",
+        vol: "Kapasitas Waktu",
+        unit: "Satuan Waktu",
+        qty: "Lama Pengerjaan",
+      },
+      otherLabels: {
+        price: "Total Biaya (Nota)",
+        vol: "Estimasi Batas Pakai",
+        unit: "Satuan",
+        qty: "Pemakaian 1 Batch",
+      },
+    },
+    retail: {
+      inputPlaceholder: "Cth: Sepatu Sneakers Polos",
+      mainTitle: "1. Harga Beli Barang Dagang",
+      laborTitle: "2. Tenaga Kerja",
+      otherTitle: "3. Biaya Logistik & Pengemasan",
+      mainDesc: "Harga beli produk utuh dari supplier / agen grosir.",
+      laborDesc: "Upah pegawai yang mengepak atau melayani pesanan ini.",
+      otherDesc:
+        "Biaya ekspedisi, ongkos kirim, dan material keamanan (Bubble Wrap).",
+      mainCol: "Nama Barang Grosir",
+      laborCol: "Peran Pekerja",
+      otherCol: "Nama Biaya Logistik",
+      mainUnits: ["pcs", "unit", "pasang"],
+      laborUnits: ["jam", "hari", "orang"],
+      otherUnits: ["resi", "pcs", "meter"],
+      mainLabels: {
+        price: "Harga Beli Grosir",
+        vol: "Isi per Grosir",
+        unit: "Satuan Eceran",
+        qty: "Dijual per Paket",
+      },
+      laborLabels: {
+        price: "Gaji Pokok Pekerja",
+        vol: "Target Kuantitas",
+        unit: "Satuan Waktu",
+        qty: "Waktu Mengemas",
+      },
+      otherLabels: {
+        price: "Total Biaya (Resi)",
+        vol: "Kapasitas Bagi Rata",
+        unit: "Satuan",
+        qty: "Beban per Unit",
+      },
+    },
+    jasa: {
+      inputPlaceholder: "Cth: Jasa Servis AC / Pijat Refleksi",
+      mainTitle: "1. Material Utama & Suku Cadang",
+      laborTitle: "2. Upah Tenaga Kerja Profesional",
+      otherTitle: "3. Biaya Transportasi & Overhead",
+      mainDesc:
+        "Barang yang dihabiskan untuk layanan (Krim Pijat, Freon AC, Sparepart).",
+      laborDesc: "Gaji utama teknisi atau penyedia jasa layanan ini.",
+      otherDesc: "Biaya bensin, parkir, penyusutan alat, dan konsumsi.",
+      mainCol: "Nama Material",
+      laborCol: "Nama / Peran Teknisi",
+      otherCol: "Nama Biaya Overhead",
+      mainUnits: ["ml", "gr", "pcs"],
+      laborUnits: ["menit", "jam", "sesi"],
+      otherUnits: ["liter", "km", "kali"],
+      mainLabels: {
+        price: "Harga Beli Material",
+        vol: "Isi Kemasan Total",
+        unit: "Satuan Dasar",
+        qty: "Dipakai 1 Sesi",
+      },
+      laborLabels: {
+        price: "Tarif Pokok / Gaji",
+        vol: "Kapasitas Waktu",
+        unit: "Satuan Waktu",
+        qty: "Durasi 1 Sesi",
+      },
+      otherLabels: {
+        price: "Total Pengeluaran",
+        vol: "Batas Pemakaian",
+        unit: "Satuan",
+        qty: "Beban per Sesi",
+      },
+    },
+  };
+
+  const currentConf = typeConfig[businessType];
+
+  const [mainRows, setMainRows] = useState([
+    {
+      id: 1,
+      name: "",
+      totalPrice: "",
+      totalVolume: "",
+      unit: currentConf.mainUnits[0],
+      recipeQty: "",
+    },
+  ]);
+  const [laborRows, setLaborRows] = useState([
+    {
+      id: 2,
+      name: "",
+      totalPrice: "",
+      totalVolume: "",
+      unit: currentConf.laborUnits[0],
+      recipeQty: "",
+    },
+  ]);
+  const [otherRows, setOtherRows] = useState([
+    {
+      id: 3,
+      name: "",
+      totalPrice: "",
+      totalVolume: "",
+      unit: currentConf.otherUnits[0],
+      recipeQty: "",
+    },
+  ]);
+
+  const [sellingPrice, setSellingPrice] = useState("");
+
+  const formatRp = (num) =>
+    "Rp " +
+    (Number(num) || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 });
+
+  const addRow = (type) => {
+    const id = Date.now();
+    if (type === "main")
+      setMainRows([
+        ...mainRows,
+        {
+          id,
+          name: "",
+          totalPrice: "",
+          totalVolume: "",
+          unit: currentConf.mainUnits[0],
+          recipeQty: "",
+        },
+      ]);
+    else if (type === "labor")
+      setLaborRows([
+        ...laborRows,
+        {
+          id,
+          name: "",
+          totalPrice: "",
+          totalVolume: "",
+          unit: currentConf.laborUnits[0],
+          recipeQty: "",
+        },
+      ]);
+    else
+      setOtherRows([
+        ...otherRows,
+        {
+          id,
+          name: "",
+          totalPrice: "",
+          totalVolume: "",
+          unit: currentConf.otherUnits[0],
+          recipeQty: "",
+        },
+      ]);
+  };
+
+  const removeRow = (type, id) => {
+    if (type === "main") setMainRows(mainRows.filter((row) => row.id !== id));
+    else if (type === "labor")
+      setLaborRows(laborRows.filter((row) => row.id !== id));
+    else setOtherRows(otherRows.filter((row) => row.id !== id));
+  };
+
+  const updateRow = (type, id, field, value) => {
+    if (type === "main")
+      setMainRows(
+        mainRows.map((row) =>
+          row.id === id ? { ...row, [field]: value } : row,
+        ),
+      );
+    else if (type === "labor")
+      setLaborRows(
+        laborRows.map((row) =>
+          row.id === id ? { ...row, [field]: value } : row,
+        ),
+      );
+    else
+      setOtherRows(
+        otherRows.map((row) =>
+          row.id === id ? { ...row, [field]: value } : row,
+        ),
+      );
+  };
+
+  const handleTypeChange = (e) => {
+    const val = e.target.value;
+    setBusinessType(val);
+    const conf = typeConfig[val];
+
+    setMainRows([
+      {
+        id: Date.now(),
+        name: "",
+        totalPrice: "",
+        totalVolume: "",
+        unit: conf.mainUnits[0],
+        recipeQty: "",
+      },
+    ]);
+    setLaborRows([
+      {
+        id: Date.now() + 1,
+        name: "",
+        totalPrice: "",
+        totalVolume: "",
+        unit: conf.laborUnits[0],
+        recipeQty: "",
+      },
+    ]);
+    setOtherRows([
+      {
+        id: Date.now() + 2,
+        name: "",
+        totalPrice: "",
+        totalVolume: "",
+        unit: conf.otherUnits[0],
+        recipeQty: "",
+      },
+    ]);
+
+    if (val === "produksi") {
+      setYieldQty(1);
+      setYieldUnit("Porsi");
+    } else if (val === "retail") {
+      setYieldQty(1);
+      setYieldUnit("Unit");
+    } else {
+      setYieldQty(1);
+      setYieldUnit("Sesi");
+    }
+  };
+
+  const getRowCost = (row) => {
+    const price = Number(row.totalPrice) || 0;
+    const volume = Number(row.totalVolume) > 0 ? Number(row.totalVolume) : 1;
+    const recipeQty = Number(row.recipeQty) || 0;
+    return (price / volume) * recipeQty;
+  };
+
+  const sumMain = mainRows.reduce((sum, row) => sum + getRowCost(row), 0);
+  const sumLabor = laborRows.reduce((sum, row) => sum + getRowCost(row), 0);
+  const sumOther = otherRows.reduce((sum, row) => sum + getRowCost(row), 0);
+
+  const grandTotalBatch = sumMain + sumLabor + sumOther;
+  const activeYieldQty =
+    businessType === "produksi"
+      ? Number(yieldQty) > 0
+        ? Number(yieldQty)
+        : 1
+      : 1;
+  const totalHppPerUnit = grandTotalBatch / activeYieldQty;
+
+  const margin30 = totalHppPerUnit * 1.3;
+  const margin40 = totalHppPerUnit * 1.4;
+  const labaBersih = Number(sellingPrice) - totalHppPerUnit;
+
+const handleSave = async () => {
+    if (!isLoggedIn) {
+      openModal('auth');
+      return;
+    }
+
+    try {
+      // Ambil data user yang sedang aktif
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // 1. Simpan Produk Utama
+      const { data: product, error: pError } = await supabase
+        .from('products')
+        .insert([{
+          user_id: user.id, // Tambahkan user_id di sini
+          nama_produk: productName,
+          kategori: businessType,
+          yield_qty: yieldQty,
+          yield_unit: yieldUnit,
+          hpp_per_unit: totalHppPerUnit,
+          harga_jual: Number(sellingPrice)
+        }])
+        .select();
+
+      if (pError) {
+        alert("Gagal menyimpan produk: " + pError.message);
+        return;
+      }
+
+      // 2. Simpan Detail Bahan Baku (Looping dari mainRows)
+      const product_id = product[0].id;
+      const ingredientsToSave = mainRows.map(row => ({
+        user_id: user.id, // WAJIB ADA AGAR LOLOS RLS SUPABASE
+        product_id: product_id,
+        nama_bahan: row.name,
+        biaya_porsi: (Number(row.totalPrice) / Number(row.totalVolume)) * Number(row.recipeQty)
+      }));
+
+      const { error: iError } = await supabase.from('recipe_items').insert(ingredientsToSave);
+
+      if (iError) {
+        alert("Produk tersimpan, tapi gagal menyimpan bahan: " + iError.message);
+        console.error("Detail Error Bahan:", iError);
+      } else {
+        alert("Produk & Resep Berhasil Disimpan! 🚀");
+        // Reset form jika diperlukan
+        setProductName('');
+        setMainRows([{ id: 1, name: '', totalPrice: '', totalVolume: '', unit: 'gram', recipeQty: '', recipeUnit: 'gram' }]);
+      }
+      
+    } catch (err) {
+      console.error("Fatal Error:", err);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20">
+      {/* Judul dan Pemilih Kategori */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+        <div>
+          <h2 className="font-montserrat font-bold text-3xl md:text-4xl text-smart-text mb-2 transition-colors duration-300">
+            Kalkulator HPP Cerdas
+          </h2>
+          <p className="text-smart-text-muted text-sm md:text-base">
+            Dilengkapi 3 Komponen Akuntansi Pabrik & Logika Produksi.
+          </p>
+        </div>
+
+        <div className="bg-smart-card border border-smart-border rounded-2xl px-5 py-3 flex items-center shadow-lg hover:border-smart-text-muted transition-colors duration-300">
+          <span className="text-sm text-smart-text-muted mr-3 font-medium">
+            Tipe Bisnis:
+          </span>
+          <select
+            value={businessType}
+            onChange={handleTypeChange}
+            className="bg-transparent text-sm font-bold text-smart-text focus:outline-none cursor-pointer appearance-none pr-4 transition-colors"
+          >
+            <option value="produksi" className="bg-smart-bg">
+              Produksi (F&B / Kriya)
+            </option>
+            <option value="retail" className="bg-smart-bg">
+              Retail - Beli Jual
+            </option>
+            <option value="jasa" className="bg-smart-bg">
+              Jasa & Pelayanan
+            </option>
+          </select>
+          <span className="material-icons-round text-smart-text-muted pointer-events-none text-sm">
+            expand_more
+          </span>
+        </div>
+      </div>
+
+      {/* PANEL PANDUAN PENGGUNAAN PERMANEN */}
+      <div className="bg-gradient-to-br from-smart-card to-smart-bg border border-smart-lime/40 p-6 md:p-8 rounded-[2rem] shadow-2xl mb-8 relative overflow-hidden transition-colors duration-300">
+        {/* Aksen Dekoratif */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-smart-lime/5 rounded-bl-full pointer-events-none"></div>
+
+        <h3 className="font-montserrat font-bold text-xl text-smart-lime mb-4 flex items-center gap-2">
+          <span className="material-icons-round">lightbulb</span> Panduan
+          Pengisian Otomatis
+        </h3>
+        <p className="text-smart-text text-sm leading-relaxed mb-6 opacity-90">
+          <strong>Rahasia SmartHPP:</strong> Anda tidak perlu menghitung harga
+          satuan memakai kalkulator! Cukup masukkan{" "}
+          <span className="font-bold underline decoration-smart-lime underline-offset-4">
+            Harga Total sesuai di Nota Belanja
+          </span>
+          . Sistem kami yang akan memecahnya secara otomatis.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Panduan Tabel 1 Dinamis */}
+          <div className="bg-smart-border/30 p-4 rounded-xl border border-smart-border">
+            <h4 className="font-bold text-smart-text text-sm mb-2">
+              {currentConf.mainTitle}
+            </h4>
+            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+              <li>
+                <strong>{currentConf.mainLabels.price}:</strong> Uang yang Anda
+                bayarkan ke kasir.
+              </li>
+              <li>
+                <strong>{currentConf.mainLabels.vol}:</strong> Kapasitas barang
+                yang didapat (Cth: Beli 1 Kg, isi "1000").
+              </li>
+              <li>
+                <strong>{currentConf.mainLabels.qty}:</strong> Berapa yang
+                dipakai untuk resep/pesanan ini saja.
+              </li>
+            </ul>
+          </div>
+
+          {/* Panduan Tabel 2 Dinamis */}
+          <div className="bg-smart-border/30 p-4 rounded-xl border border-smart-border">
+            <h4 className="font-bold text-smart-text text-sm mb-2">
+              {currentConf.laborTitle}
+            </h4>
+            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+              <li>
+                <strong>{currentConf.laborLabels.price}:</strong> Gaji pekerja
+                secara utuh (Harian/Bulanan).
+              </li>
+              <li>
+                <strong>{currentConf.laborLabels.vol}:</strong> Total jam/hari
+                kerjanya dalam sebulan.
+              </li>
+              <li>
+                <strong>{currentConf.laborLabels.qty}:</strong> Durasi yang
+                dihabiskan untuk melayani 1 order ini.
+              </li>
+            </ul>
+          </div>
+
+          {/* Panduan Tabel 3 Dinamis */}
+          <div className="bg-smart-border/30 p-4 rounded-xl border border-smart-border">
+            <h4 className="font-bold text-smart-text text-sm mb-2">
+              {currentConf.otherTitle}
+            </h4>
+            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+              <li>
+                <strong>{currentConf.otherLabels.price}:</strong> Total tagihan
+                (Cth: Beli Gas Rp 20.000).
+              </li>
+              <li>
+                <strong>{currentConf.otherLabels.vol}:</strong> Gas itu
+                kira-kira habis untuk berapa porsi?
+              </li>
+              <li>
+                <strong>{currentConf.otherLabels.qty}:</strong> Ketik 1, agar
+                beban dibagi rata ke porsi/layanan.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {businessType === "produksi" && (
+          <div className="mt-6 bg-smart-lime/10 p-4 rounded-xl border border-smart-lime/20 text-sm">
+            <strong className="text-smart-lime">
+              💡 Tips "Jumlah Produk Dihasilkan":
+            </strong>{" "}
+            Karena Anda di mode Produksi, wajar jika tabel diisi dengan takaran
+            masak besar (1 wajan). Nanti, masukkan "Jumlah Produk" di panel
+            sebelah kanan agar sistem membaginya menjadi Harga Per Porsi.
+          </div>
+        )}
+      </div>
+
+      {!isLoggedIn && (
+        <div className="bg-smart-lime/10 border border-smart-lime/30 text-smart-lime px-6 py-4 rounded-2xl mb-8 flex items-start md:items-center gap-4 text-sm md:text-base font-medium">
+          <span className="material-icons-round text-2xl">info</span>
+          <p className="leading-relaxed">
+            Mode Simulasi. Anda bisa menghitung HPP secara bebas, namun data
+            tidak akan tersimpan permanen sebelum{" "}
+            <button
+              onClick={() => openModal && openModal("auth")}
+              className="underline font-bold hover:opacity-80 transition-opacity"
+            >
+              membuat akun
+            </button>
+            .
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* KOLOM KIRI (Tabel Input) */}
+        <div className="xl:col-span-2 flex flex-col gap-6">
+          <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
+            <label className="block text-sm font-bold text-smart-text-muted mb-3 tracking-wide uppercase">
+              Nama Resep / Layanan
+            </label>
+            <input
+              type="text"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder={currentConf.inputPlaceholder}
+              className="w-full bg-smart-bg border border-smart-border rounded-xl px-5 py-4 text-lg font-bold focus:outline-none focus:border-smart-lime text-smart-text transition-all"
+            />
+          </div>
+
+          <TableGroup
+            type="main"
+            title={currentConf.mainTitle}
+            desc={currentConf.mainDesc}
+            colName={currentConf.mainCol}
+            rows={mainRows}
+            units={currentConf.mainUnits}
+            labels={currentConf.mainLabels}
+            updateRow={updateRow}
+            removeRow={removeRow}
+            getRowCost={getRowCost}
+            formatRp={formatRp}
+            addRow={addRow}
+          />
+          <TableGroup
+            type="labor"
+            title={currentConf.laborTitle}
+            desc={currentConf.laborDesc}
+            colName={currentConf.laborCol}
+            rows={laborRows}
+            units={currentConf.laborUnits}
+            labels={currentConf.laborLabels}
+            updateRow={updateRow}
+            removeRow={removeRow}
+            getRowCost={getRowCost}
+            formatRp={formatRp}
+            addRow={addRow}
+          />
+          <TableGroup
+            type="other"
+            title={currentConf.otherTitle}
+            desc={currentConf.otherDesc}
+            colName={currentConf.otherCol}
+            rows={otherRows}
+            units={currentConf.otherUnits}
+            labels={currentConf.otherLabels}
+            updateRow={updateRow}
+            removeRow={removeRow}
+            getRowCost={getRowCost}
+            formatRp={formatRp}
+            addRow={addRow}
+          />
+
+          <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4 transition-colors duration-300">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm font-medium w-full sm:w-auto text-center sm:text-left overflow-x-auto">
+              <div>
+                <p className="text-smart-text-muted text-[11px] mb-1 uppercase tracking-wider">
+                  Sub-Total Bahan
+                </p>
+                <p className="text-smart-text font-bold text-base">
+                  {formatRp(sumMain)}
+                </p>
+              </div>
+              <span className="text-smart-text-muted font-bold hidden sm:block">
+                +
+              </span>
+              <div>
+                <p className="text-smart-text-muted text-[11px] mb-1 uppercase tracking-wider">
+                  Sub-Total Tenaga
+                </p>
+                <p className="text-smart-text font-bold text-base">
+                  {formatRp(sumLabor)}
+                </p>
+              </div>
+              <span className="text-smart-text-muted font-bold hidden sm:block">
+                +
+              </span>
+              <div>
+                <p className="text-smart-text-muted text-[11px] mb-1 uppercase tracking-wider">
+                  Sub-Total Overhead
+                </p>
+                <p className="text-smart-text font-bold text-base">
+                  {formatRp(sumOther)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* KOLOM KANAN (Hasil Akhir & Keputusan) */}
+        <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col h-fit sticky top-8 transition-colors duration-300">
+          {businessType === "produksi" && (
+            <div className="mb-6 pb-6 border-b border-smart-border">
+              <h3 className="text-smart-text-muted text-xs font-semibold mb-2 uppercase tracking-widest">
+                Total Modal Keseluruhan
+              </h3>
+              <p className="text-smart-text font-black text-2xl mb-5">
+                {formatRp(grandTotalBatch)}
+              </p>
+
+              <label className="block text-sm font-bold text-smart-lime mb-3 tracking-wide flex items-center justify-between">
+                Jumlah Produk yang Dihasilkan
+                <span
+                  className="material-icons-round text-smart-lime text-sm cursor-help"
+                  title="Masukkan berapa banyak produk yang jadi dari resep di atas"
+                >
+                  info
+                </span>
+              </label>
+              <div className="flex gap-2 animate-fade-in">
+                <input
+                  type="number"
+                  min="1"
+                  value={yieldQty}
+                  onChange={(e) => setYieldQty(e.target.value)}
+                  className="w-2/3 bg-smart-lime/10 border border-smart-lime/50 rounded-xl px-4 py-3 text-lg font-bold text-smart-lime focus:outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  value={yieldUnit}
+                  onChange={(e) => setYieldUnit(e.target.value)}
+                  className="w-1/3 bg-smart-bg border border-smart-border rounded-xl px-3 py-3 text-sm font-bold text-smart-text focus:outline-none text-center"
+                />
+              </div>
+            </div>
+          )}
+
+          {businessType !== "produksi" ? (
+            <h3 className="text-smart-text-muted text-xs font-semibold mb-1 uppercase tracking-widest">
+              Modal HPP per {yieldUnit}
+            </h3>
+          ) : (
+            <h3 className="text-smart-lime text-xs font-bold mb-1 uppercase tracking-widest">
+              Hasil: Modal HPP per {yieldUnit}
+            </h3>
+          )}
+
+          <h2 className="font-montserrat font-extrabold text-4xl md:text-5xl text-smart-text mb-8">
+            {formatRp(totalHppPerUnit)}
+          </h2>
+
+          <div className="mb-8">
+            <h4 className="font-montserrat font-bold text-sm mb-4 text-smart-text">
+              Rekomendasi Harga Jual (Markup)
+            </h4>
+            <div className="space-y-3">
+              <div className="bg-smart-bg border border-smart-border rounded-xl p-4 flex justify-between items-center group hover:border-blue-400/50 transition-colors">
+                <span className="font-bold text-sm text-smart-text">
+                  {formatRp(margin30)}
+                </span>
+                <span className="text-xs text-smart-text-muted">
+                  (Untung 30%)
+                </span>
+              </div>
+              <div className="bg-smart-bg border border-smart-lime/40 rounded-xl p-4 flex justify-between items-center group hover:border-smart-lime transition-colors shadow-[0_0_15px_rgba(212,245,66,0.05)]">
+                <span className="font-bold text-sm text-smart-lime">
+                  {formatRp(margin40)}
+                </span>
+                <span className="text-xs font-bold text-smart-lime/80">
+                  ⭐ (Ideal 40%)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h4 className="font-montserrat font-bold text-sm mb-3 text-smart-text">
+              Keputusan Harga Jual Anda
+            </h4>
+            <div className="relative">
+              <span className="absolute left-4 top-4 text-smart-text-muted font-bold">
+                Rp
+              </span>
+              <input
+                type="number"
+                value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)}
+                placeholder="0"
+                className="w-full bg-smart-bg border border-smart-border rounded-xl pl-12 pr-4 py-4 text-lg font-bold focus:outline-none focus:ring-1 focus:ring-smart-lime focus:border-smart-lime text-smart-text mb-2 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="mb-8 border-t border-smart-border pt-6">
+            <h4 className="text-sm font-semibold text-smart-text-muted mb-2">
+              Laba Bersih per {yieldUnit}:
+            </h4>
+            <h3
+              className={`font-montserrat font-bold text-2xl md:text-3xl tracking-tight ${sellingPrice === "" ? "text-smart-text-muted" : labaBersih >= 0 ? "text-smart-lime" : "text-red-500"}`}
+            >
+              {sellingPrice === "" ? "Rp 0" : formatRp(labaBersih)}
+            </h3>
+            {labaBersih < 0 && sellingPrice !== "" && (
+              <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                <span className="material-icons-round text-[14px]">error</span>{" "}
+                Harga jual lebih rendah dari modal!
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={handleSave}
+            className="w-full bg-smart-lime text-smart-dark font-extrabold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-[0_4px_20px_rgba(212,245,66,0.3)] mt-auto text-base flex justify-center items-center gap-2"
+          >
+            <span className="material-icons-round">cloud_done</span> Simpan HPP
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
