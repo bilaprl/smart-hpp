@@ -83,7 +83,7 @@ const TableGroup = ({
                     <input
                       type="number"
                       min="0"
-                      step="any" // <--- TAMBAHAN AGAR BISA DESIMAL
+                      step="any"
                       placeholder="0"
                       value={row.totalPrice}
                       onChange={(e) =>
@@ -96,7 +96,7 @@ const TableGroup = ({
                     <input
                       type="number"
                       min="0"
-                      step="any" // <--- TAMBAHAN AGAR BISA DESIMAL
+                      step="any"
                       placeholder="Total"
                       value={row.totalVolume}
                       onChange={(e) =>
@@ -129,7 +129,7 @@ const TableGroup = ({
                     <input
                       type="number"
                       min="0"
-                      step="any" // <--- TAMBAHAN AGAR BISA DESIMAL
+                      step="any"
                       placeholder="0"
                       value={row.recipeQty}
                       onChange={(e) =>
@@ -188,7 +188,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
   const [productName, setProductName] = useState("");
   const [sellingPrice, setSellingPrice] = useState("");
 
-  // LOGIKA EDIT PRODUK
   const [existingProducts, setExistingProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("new");
 
@@ -298,42 +297,33 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
   const currentConf = typeConfig[businessType];
 
-  const [mainRows, setMainRows] = useState([
+  const createResetRow = (unitsArray) => [
     {
-      id: 1,
+      id: Date.now(),
       name: "",
       totalPrice: "",
       totalVolume: "",
-      unit: currentConf.mainUnits[0],
+      unit: unitsArray[0],
       recipeQty: "",
     },
-  ]);
-  const [laborRows, setLaborRows] = useState([
-    {
-      id: 2,
-      name: "",
-      totalPrice: "",
-      totalVolume: "",
-      unit: currentConf.laborUnits[0],
-      recipeQty: "",
-    },
-  ]);
-  const [otherRows, setOtherRows] = useState([
-    {
-      id: 3,
-      name: "",
-      totalPrice: "",
-      totalVolume: "",
-      unit: currentConf.otherUnits[0],
-      recipeQty: "",
-    },
-  ]);
+  ];
+
+  const [mainRows, setMainRows] = useState(
+    createResetRow(currentConf.mainUnits),
+  );
+  const [laborRows, setLaborRows] = useState(
+    createResetRow(currentConf.laborUnits),
+  );
+  const [otherRows, setOtherRows] = useState(
+    createResetRow(currentConf.otherUnits),
+  );
 
   useEffect(() => {
     const fetchExisting = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
       const { data } = await supabase
         .from("products")
@@ -347,17 +337,23 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
   const handleProductSelect = async (id) => {
     setSelectedProductId(id);
+
     if (id === "new") {
       setProductName("");
       setSellingPrice("");
       setYieldQty(1);
+      setMainRows(createResetRow(currentConf.mainUnits));
+      setLaborRows(createResetRow(currentConf.laborUnits));
+      setOtherRows(createResetRow(currentConf.otherUnits));
       return;
     }
+
     const { data: product } = await supabase
       .from("products")
       .select("*")
       .eq("id", id)
       .single();
+
     if (product) {
       setProductName(product.nama_produk);
       setSellingPrice(product.harga_jual);
@@ -368,17 +364,34 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         .from("recipe_items")
         .select("*")
         .eq("product_id", id);
-      if (ing) {
+
+      if (ing && ing.length > 0) {
+        const mapRow = (i) => ({
+          id: i.id,
+          name: i.nama_bahan,
+          totalPrice: i.harga_beli || i.biaya_porsi,
+          totalVolume: i.kapasitas || "1",
+          unit: i.satuan || "pcs",
+          recipeQty: i.takaran || "1",
+        });
+
+        const mains = ing.filter((i) => i.tipe_biaya === "main").map(mapRow);
+        const labors = ing.filter((i) => i.tipe_biaya === "labor").map(mapRow);
+        const others = ing.filter((i) => i.tipe_biaya === "other").map(mapRow);
+
         setMainRows(
-          ing.map((i) => ({
-            id: i.id,
-            name: i.nama_bahan,
-            totalPrice: i.biaya_porsi,
-            totalVolume: "1",
-            unit: "pcs",
-            recipeQty: "1",
-          })),
+          mains.length > 0 ? mains : createResetRow(currentConf.mainUnits),
         );
+        setLaborRows(
+          labors.length > 0 ? labors : createResetRow(currentConf.laborUnits),
+        );
+        setOtherRows(
+          others.length > 0 ? others : createResetRow(currentConf.otherUnits),
+        );
+      } else {
+        setMainRows(createResetRow(currentConf.mainUnits));
+        setLaborRows(createResetRow(currentConf.laborUnits));
+        setOtherRows(createResetRow(currentConf.otherUnits));
       }
     }
   };
@@ -422,19 +435,11 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
     setBusinessType(val);
     const conf = typeConfig[val];
     setSelectedProductId("new");
-    const reset = (u) => [
-      {
-        id: Date.now(),
-        name: "",
-        totalPrice: "",
-        totalVolume: "",
-        unit: u[0],
-        recipeQty: "",
-      },
-    ];
-    setMainRows(reset(conf.mainUnits));
-    setLaborRows(reset(conf.laborUnits));
-    setOtherRows(reset(conf.otherUnits));
+
+    setMainRows(createResetRow(conf.mainUnits));
+    setLaborRows(createResetRow(conf.laborUnits));
+    setOtherRows(createResetRow(conf.otherUnits));
+
     setProductName("");
     setSellingPrice("");
     setYieldQty(1);
@@ -470,31 +475,28 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
   const handleSave = async () => {
     if (!isLoggedIn) return openModal("auth");
 
-    // =========================================================================
-    // VALIDASI INPUT
-    // =========================================================================
     if (!productName || productName.trim() === "") {
       alert("⚠️ Ops, Nama Produk/Layanan belum diisi!");
       return;
     }
-
     if (totalHppPerUnit <= 0) {
       alert(
         "⚠️ Total HPP masih Rp 0! Tolong isi minimal satu item biaya pada tabel di atas.",
       );
       return;
     }
-
     if (!sellingPrice || Number(sellingPrice) <= 0) {
       alert("⚠️ Harga Jual tidak boleh Rp 0! Masukkan harga jual yang wajar.");
       return;
     }
-    // =========================================================================
 
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) throw new Error("Sesi tidak valid");
+
       const payload = {
         user_id: user.id,
         nama_produk: productName,
@@ -521,17 +523,37 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         pid = data[0].id;
       }
 
-      const ingredients = mainRows.map((row) => ({
+      // Filter Cerdas: Buang baris kosong & Gabungkan 3 tabel dengan tipe biayanya
+      const filterValidRows = (rows, tipe) =>
+        rows
+          .filter((r) => r.name.trim() !== "")
+          .map((r) => ({ ...r, tipe_biaya: tipe }));
+
+      const allIngredients = [
+        ...filterValidRows(mainRows, "main"),
+        ...filterValidRows(laborRows, "labor"),
+        ...filterValidRows(otherRows, "other"),
+      ];
+
+      const ingredientsToSave = allIngredients.map((row) => ({
         user_id: user.id,
         product_id: pid,
         nama_bahan: row.name,
         biaya_porsi: getRowCost(row),
+        tipe_biaya: row.tipe_biaya,
+        harga_beli: Number(row.totalPrice) || 0,
+        kapasitas: Number(row.totalVolume) || 1,
+        satuan: row.unit,
+        takaran: Number(row.recipeQty) || 0,
       }));
-      await supabase.from("recipe_items").insert(ingredients);
-      alert("HPP Berhasil Disimpan! 🚀");
+
+      await supabase.from("recipe_items").insert(ingredientsToSave);
+
+      alert("HPP Berhasil Disimpan & Sinkron dengan Database! 🚀");
       window.location.reload();
     } catch (err) {
       console.error(err);
+      alert("Gagal menyimpan: " + err.message);
     }
   };
 
