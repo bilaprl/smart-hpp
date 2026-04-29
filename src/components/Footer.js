@@ -1,16 +1,88 @@
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+
 export default function Footer({ isLoggedIn, openModal, navigate }) {
-  // Simulasi nama user dari database (bisa diprop nanti)
-  const userName = isLoggedIn ? "Nabila" : "";
+  // State untuk menyimpan nama user secara dinamis
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    let profileChannel;
+
+    // Fungsi untuk menarik data nama terbaru
+    const fetchName = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("nama_owner")
+        .eq("id", user.id)
+        .single();
+
+      // Prioritas: 1. Nama di database, 2. Nama dari email
+      const finalName = data?.nama_owner || user.email.split("@")[0];
+      setUserName(finalName);
+    };
+
+    const getProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Tarik data pertama kali saat web diload
+      await fetchName();
+
+      // =========================================================
+      // REALTIME SERVER (Supabase Realtime)
+      // =========================================================
+      profileChannel = supabase
+        .channel(`footer-profile-sync-${Date.now()}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "profiles",
+            filter: `id=eq.${user.id}`,
+          },
+          () => {
+            console.log("Profil berubah (Server)! Mengupdate Footer...");
+            fetchName();
+          },
+        )
+        .subscribe();
+    };
+
+    if (isLoggedIn) getProfile();
+
+    // =========================================================
+    // REALTIME LOKAL (Custom Event dari Modals.jsx)
+    // =========================================================
+    const handleLocalUpdate = () => {
+      console.log("Profil berubah (Lokal)! Mengupdate Footer...");
+      fetchName();
+    };
+
+    // Dengarkan sinyal "profileUpdated" dari Modal
+    window.addEventListener("profileUpdated", handleLocalUpdate);
+
+    // Cleanup realtime jika komponen dilepas
+    return () => {
+      if (profileChannel) supabase.removeChannel(profileChannel);
+      window.removeEventListener("profileUpdated", handleLocalUpdate);
+    };
+  }, [isLoggedIn]);
 
   return (
     <footer className="relative w-full bg-smart-bg pt-16 pb-8 border-t border-smart-border mt-20 transition-colors duration-300">
-      
       {/* =========================================
           MAIN FOOTER CONTENT
           ========================================= */}
       <div className="max-w-7xl mx-auto px-6 md:px-8 pt-8 md:pt-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
-          
           {/* Kolom 1: Brand Info */}
           <div className="lg:col-span-2">
             <div
@@ -82,7 +154,7 @@ export default function Footer({ isLoggedIn, openModal, navigate }) {
 
             {/* CTA Pindah ke Sini */}
             {isLoggedIn ? (
-              <p className="text-sm text-smart-lime font-bold">
+              <p className="text-sm text-smart-lime font-bold italic capitalize">
                 Halo, {userName}!
               </p>
             ) : (
@@ -97,7 +169,6 @@ export default function Footer({ isLoggedIn, openModal, navigate }) {
               </button>
             )}
           </div>
-
         </div>
 
         {/* =========================================
@@ -105,7 +176,8 @@ export default function Footer({ isLoggedIn, openModal, navigate }) {
             ========================================= */}
         <div className="pt-8 border-t border-smart-border/50 flex flex-col items-center gap-4 transition-colors duration-300">
           <p className="text-smart-text-muted opacity-80 text-xs text-center w-full transition-colors">
-            &copy; {new Date().getFullYear()} SmartHPP. Hak Cipta Dilindungi Undang-Undang.
+            &copy; {new Date().getFullYear()} SmartHPP. Hak Cipta Dilindungi
+            Undang-Undang.
           </p>
         </div>
       </div>
