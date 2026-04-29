@@ -17,7 +17,7 @@ export default function Navbar({
   useEffect(() => {
     let profileChannel;
 
-    // Fungsi untuk menarik data nama terbaru (Dikeluarkan agar bisa dipanggil dari luar)
+    // Fungsi untuk menarik data nama terbaru
     const fetchName = async () => {
       const {
         data: { user },
