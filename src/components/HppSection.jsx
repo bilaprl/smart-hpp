@@ -297,9 +297,10 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
   const currentConf = typeConfig[businessType];
 
+  // FIX ANOMALI 2: Mencegah ID kembar dengan Math.random()
   const createResetRow = (unitsArray) => [
     {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       name: "",
       totalPrice: "",
       totalVolume: "",
@@ -342,15 +343,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
       setProductName("");
       setSellingPrice("");
       setYieldQty(1);
-      setYieldUnit(
-        businessType === "produksi"
-          ? "Pcs"
-          : businessType === "retail"
-            ? "Pcs"
-            : "Sesi",
-      );
-
-      setMainRows(createResetRow(currentConf.mainUnits));
       setMainRows(createResetRow(currentConf.mainUnits));
       setLaborRows(createResetRow(currentConf.laborUnits));
       setOtherRows(createResetRow(currentConf.otherUnits));
@@ -375,20 +367,23 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         .eq("product_id", id);
 
       if (ing && ing.length > 0) {
+        // FIX ANOMALI 3: Pakai ?? (Nullish Coalescing) agar angka 0 tidak dianggap palsu/kosong
         const mapRow = (i) => ({
           id: i.id,
           name: i.nama_bahan,
-          totalPrice: i.harga_beli || i.biaya_porsi,
-          totalVolume: i.kapasitas || "1",
+          totalPrice: i.harga_beli ?? i.biaya_porsi,
+          totalVolume: i.kapasitas ?? "1",
           unit: i.satuan || "pcs",
-          recipeQty: i.takaran || "1",
+          recipeQty: i.takaran ?? "1",
         });
 
+        // FIX ANOMALI 1: Selamatkan data lama yang belum punya tipe_biaya (!i.tipe_biaya) ke tabel Main
         const mains = ing
           .filter((i) => i.tipe_biaya === "main" || !i.tipe_biaya)
           .map(mapRow);
         const labors = ing.filter((i) => i.tipe_biaya === "labor").map(mapRow);
         const others = ing.filter((i) => i.tipe_biaya === "other").map(mapRow);
+
         setMainRows(
           mains.length > 0 ? mains : createResetRow(currentConf.mainUnits),
         );
@@ -411,7 +406,8 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
     (Number(num) || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 });
 
   const addRow = (type) => {
-    const id = Date.now();
+    // FIX ANOMALI 2 (lanjutan): Mencegah duplikasi saat tambah baris cepat
+    const id = Date.now() + Math.random();
     const row = {
       id,
       name: "",
@@ -533,15 +529,10 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         pid = data[0].id;
       }
 
-      // Filter Cerdas: Buang baris kosong & Gabungkan 3 tabel dengan tipe biayanya
       const filterValidRows = (rows, tipe) =>
         rows
-          .filter((r) => r.name.trim() !== "" || Number(r.totalPrice) > 0)
-          .map((r) => ({
-            ...r,
-            name: r.name.trim() === "" ? "(Tanpa Nama)" : r.name, // Otomatis kasih nama kalau lupa
-            tipe_biaya: tipe,
-          }));
+          .filter((r) => r.name.trim() !== "")
+          .map((r) => ({ ...r, tipe_biaya: tipe }));
 
       const allIngredients = [
         ...filterValidRows(mainRows, "main"),
