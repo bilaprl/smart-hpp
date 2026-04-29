@@ -297,7 +297,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
   const currentConf = typeConfig[businessType];
 
-  // FIX ANOMALI 2: Mencegah ID kembar dengan Math.random()
   const createResetRow = (unitsArray) => [
     {
       id: Date.now() + Math.random(),
@@ -367,17 +366,16 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         .eq("product_id", id);
 
       if (ing && ing.length > 0) {
-        // FIX ANOMALI 3: Pakai ?? (Nullish Coalescing) agar angka 0 tidak dianggap palsu/kosong
         const mapRow = (i) => ({
           id: i.id,
           name: i.nama_bahan,
-          totalPrice: i.harga_beli ?? i.biaya_porsi,
+          totalPrice: i.harga_beli ?? i.biaya_porsi ?? "",
           totalVolume: i.kapasitas ?? "1",
           unit: i.satuan || "pcs",
           recipeQty: i.takaran ?? "1",
         });
 
-        // FIX ANOMALI 1: Selamatkan data lama yang belum punya tipe_biaya (!i.tipe_biaya) ke tabel Main
+        // Filter memisahkan sesuai tipe, jika data lama tidak ada tipe_biaya, diselamatkan ke main
         const mains = ing
           .filter((i) => i.tipe_biaya === "main" || !i.tipe_biaya)
           .map(mapRow);
@@ -406,7 +404,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
     (Number(num) || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 });
 
   const addRow = (type) => {
-    // FIX ANOMALI 2 (lanjutan): Mencegah duplikasi saat tambah baris cepat
     const id = Date.now() + Math.random();
     const row = {
       id,
@@ -499,9 +496,13 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
     try {
       const {
         data: { session },
+        error: sessionError,
       } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
       const user = session?.user;
-      if (!user) throw new Error("Sesi tidak valid");
+      if (!user)
+        throw new Error("Sesi login tidak valid. Silakan muat ulang halaman.");
 
       const payload = {
         user_id: user.id,
@@ -515,17 +516,25 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
       let pid;
       if (selectedProductId !== "new") {
-        await supabase
+        const { error: errUpdate } = await supabase
           .from("products")
           .update(payload)
           .eq("id", selectedProductId);
+        if (errUpdate) throw errUpdate;
+
         pid = selectedProductId;
-        await supabase.from("recipe_items").delete().eq("product_id", pid);
+
+        const { error: errDel } = await supabase
+          .from("recipe_items")
+          .delete()
+          .eq("product_id", pid);
+        if (errDel) throw errDel;
       } else {
-        const { data } = await supabase
+        const { data, error: errInsert } = await supabase
           .from("products")
           .insert([payload])
           .select();
+        if (errInsert) throw errInsert;
         pid = data[0].id;
       }
 
@@ -552,13 +561,22 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         takaran: Number(row.recipeQty) || 0,
       }));
 
-      await supabase.from("recipe_items").insert(ingredientsToSave);
+      // SIMPAN KE SUPABASE DAN TANGKAP ERROR JIKA GAGAL!
+      const { error: errFinal } = await supabase
+        .from("recipe_items")
+        .insert(ingredientsToSave);
+      if (errFinal) throw errFinal;
 
       alert("HPP Berhasil Disimpan & Sinkron dengan Database! 🚀");
       window.location.reload();
     } catch (err) {
-      console.error(err);
-      alert("Gagal menyimpan: " + err.message);
+      console.error("SUPABASE ERROR DETAILS:", err);
+      // Tampilkan error aslinya agar ketahuan apa yang salah di database
+      const pesanError =
+        err.message || err.details || err.hint || JSON.stringify(err);
+      alert(
+        `⚠️ GAGAL MENYIMPAN DATA!\n\nAlasan: ${pesanError}\n\nPastikan kamu SUDAH MENAMBAHKAN 5 KOLOM BARU di Supabase!`,
+      );
     }
   };
 
