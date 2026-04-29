@@ -181,7 +181,8 @@ const TableGroup = ({
 export default function HppSection({ isLoggedIn = false, openModal }) {
   const [businessType, setBusinessType] = useState("produksi");
   const [yieldQty, setYieldQty] = useState(1);
-  const [yieldUnit, setYieldUnit] = useState("Porsi");
+  // Default diubah dari Porsi menjadi Pcs agar lebih netral
+  const [yieldUnit, setYieldUnit] = useState("Pcs");
   const [productName, setProductName] = useState("");
   const [sellingPrice, setSellingPrice] = useState("");
 
@@ -191,16 +192,16 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
 
   const typeConfig = {
     produksi: {
-      inputPlaceholder: "Cth: Kopi Susu Gula Aren (Resep 1 Panci)",
+      inputPlaceholder: "Cth: Kopi Susu (1 Panci) / Tote Bag (1 Batch)",
       mainTitle: "1. Bahan Baku Langsung (Direct Material)",
       laborTitle: "2. Tenaga Kerja Langsung (Direct Labor)",
       otherTitle: "3. Biaya Overhead & Kemasan",
-      mainDesc: "Komponen fisik produk (Tepung, Kopi, Daging).",
-      laborDesc: "Gaji perajin/tukang masak yang mengerjakan resep ini.",
+      mainDesc: "Komponen fisik produk (Tepung, Daging, Kain, Kayu).",
+      laborDesc: "Gaji pekerja/perajin yang mengerjakan batch/resep ini.",
       otherDesc: "Biaya utilitas (Gas, Listrik) dan Kemasan (Box, Plastik).",
       mainCol: "Nama Bahan Baku", laborCol: "Peran Pekerja", otherCol: "Nama Biaya Overhead",
-      mainUnits: ["gr", "ml", "pcs"], laborUnits: ["jam", "menit", "hari", "orang"], otherUnits: ["pcs", "pack", "ml", "kwh"],
-      mainLabels: { price: "Harga Beli (Nota)", vol: "Isi Kemasan Total", unit: "Satuan Dasar", qty: "Takaran Resep" },
+      mainUnits: ["gr", "ml", "pcs", "meter"], laborUnits: ["jam", "menit", "hari", "orang"], otherUnits: ["pcs", "pack", "ml", "kwh"],
+      mainLabels: { price: "Harga Beli (Nota)", vol: "Isi Kemasan Total", unit: "Satuan Dasar", qty: "Takaran / Porsi Pakai" },
       laborLabels: { price: "Total Upah / Gaji", vol: "Kapasitas Waktu", unit: "Satuan Waktu", qty: "Lama Pengerjaan" },
       otherLabels: { price: "Total Biaya (Nota)", vol: "Estimasi Batas Pakai", unit: "Satuan", qty: "Pemakaian 1 Batch" },
     },
@@ -306,7 +307,9 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
     setLaborRows(reset(conf.laborUnits));
     setOtherRows(reset(conf.otherUnits));
     setProductName(""); setSellingPrice("");
-    setYieldQty(1); setYieldUnit(val === "produksi" ? "Porsi" : val === "retail" ? "Unit" : "Sesi");
+    setYieldQty(1); 
+    // Default Pcs lebih netral untuk barang fisik maupun makanan (Pcs/Porsi)
+    setYieldUnit(val === "produksi" ? "Pcs" : val === "retail" ? "Pcs" : "Sesi");
   };
 
   const getRowCost = (row) => {
@@ -429,15 +432,15 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
           <div className="bg-smart-border/30 p-4 rounded-xl border border-smart-border">
             <h4 className="font-bold text-smart-text text-sm mb-2">{currentConf.otherTitle}</h4>
             <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
-              <li><strong>{currentConf.otherLabels.price}:</strong> Total tagihan (Cth: Beli Gas Rp 20.000).</li>
-              <li><strong>{currentConf.otherLabels.vol}:</strong> Gas itu kira-kira habis untuk berapa porsi?</li>
-              <li><strong>{currentConf.otherLabels.qty}:</strong> Ketik 1, agar beban dibagi rata ke porsi/layanan.</li>
+              <li><strong>{currentConf.otherLabels.price}:</strong> Total tagihan (Cth: Beli Listrik Rp 20.000).</li>
+              <li><strong>{currentConf.otherLabels.vol}:</strong> Kuota itu kira-kira habis untuk berapa Pcs/Porsi?</li>
+              <li><strong>{currentConf.otherLabels.qty}:</strong> Ketik 1, agar beban dibagi rata ke tiap Pcs/Porsi.</li>
             </ul>
           </div>
         </div>
         {businessType === "produksi" && (
           <div className="mt-6 bg-smart-lime/10 p-4 rounded-xl border border-smart-lime/20 text-sm">
-            <strong className="text-smart-lime">💡 Tips "Jumlah Produk Dihasilkan":</strong> Karena Anda di mode Produksi, wajar jika tabel diisi dengan takaran masak besar (1 wajan). Nanti, masukkan "Jumlah Produk" di panel sebelah kanan agar sistem membaginya menjadi Harga Per Porsi.
+            <strong className="text-smart-lime">💡 Tips "Jumlah Produk Dihasilkan":</strong> Karena Anda di mode Produksi, wajar jika tabel diisi dengan modal besar (1 batch/resep besar). Nanti, masukkan "Jumlah Produk" di panel sebelah kanan agar sistem membaginya menjadi Harga Per Pcs/Porsi.
           </div>
         )}
       </div>
