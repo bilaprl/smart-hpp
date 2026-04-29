@@ -342,6 +342,15 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
       setProductName("");
       setSellingPrice("");
       setYieldQty(1);
+      setYieldUnit(
+        businessType === "produksi"
+          ? "Pcs"
+          : businessType === "retail"
+            ? "Pcs"
+            : "Sesi",
+      );
+
+      setMainRows(createResetRow(currentConf.mainUnits));
       setMainRows(createResetRow(currentConf.mainUnits));
       setLaborRows(createResetRow(currentConf.laborUnits));
       setOtherRows(createResetRow(currentConf.otherUnits));
@@ -375,10 +384,11 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
           recipeQty: i.takaran || "1",
         });
 
-        const mains = ing.filter((i) => i.tipe_biaya === "main").map(mapRow);
+        const mains = ing
+          .filter((i) => i.tipe_biaya === "main" || !i.tipe_biaya)
+          .map(mapRow);
         const labors = ing.filter((i) => i.tipe_biaya === "labor").map(mapRow);
         const others = ing.filter((i) => i.tipe_biaya === "other").map(mapRow);
-
         setMainRows(
           mains.length > 0 ? mains : createResetRow(currentConf.mainUnits),
         );
@@ -526,8 +536,12 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
       // Filter Cerdas: Buang baris kosong & Gabungkan 3 tabel dengan tipe biayanya
       const filterValidRows = (rows, tipe) =>
         rows
-          .filter((r) => r.name.trim() !== "")
-          .map((r) => ({ ...r, tipe_biaya: tipe }));
+          .filter((r) => r.name.trim() !== "" || Number(r.totalPrice) > 0)
+          .map((r) => ({
+            ...r,
+            name: r.name.trim() === "" ? "(Tanpa Nama)" : r.name, // Otomatis kasih nama kalau lupa
+            tipe_biaya: tipe,
+          }));
 
       const allIngredients = [
         ...filterValidRows(mainRows, "main"),
