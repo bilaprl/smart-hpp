@@ -11,12 +11,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Area,
-  AreaChart,
 } from "recharts";
 
 export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
   const [businessType, setBusinessType] = useState("produksi");
+
+  // STATE BARU: Untuk menyimpan pilihan bulan (Default: 04 untuk April)
+  const [selectedMonth, setSelectedMonth] = useState("04");
 
   const [realData, setRealData] = useState({
     metrics: { in: "0", hpp: "0", kotor: "0", bersih: "0" },
@@ -43,11 +44,14 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
   const active = content[businessType];
 
   const handleDownloadPDF = () => {
-    if (realData.products.length === 0) return alert("Data kosong.");
+    if (realData.products.length === 0)
+      return alert("Data kosong di bulan ini.");
 
     const doc = new jsPDF();
+    const monthName = selectedMonth === "04" ? "April" : "Mei";
 
-    doc.text(`Laporan SmartHPP - ${businessType}`, 14, 15);
+    // Update judul PDF sesuai bulan yang dipilih
+    doc.text(`Laporan SmartHPP - ${businessType} (${monthName} 2026)`, 14, 15);
 
     autoTable(doc, {
       head: [["Nama Produk", "Terjual", "Pemasukan", "Laba"]],
@@ -62,9 +66,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
       alternateRowStyles: { fillColor: [250, 250, 250] },
     });
 
-    doc.save(
-      `Laporan_${businessType}_${new Date().toLocaleDateString("id-ID")}.pdf`,
-    );
+    doc.save(`Laporan_${businessType}_${monthName}_2026.pdf`);
   };
 
   useEffect(() => {
@@ -75,11 +77,21 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         } = await supabase.auth.getUser();
         if (!user) return;
 
+        // LOGIKA PENANGGALAN: Mencari rentang tanggal untuk bulan yang dipilih
+        const year = 2026;
+        const startDate = `${year}-${selectedMonth}-01`;
+        // Mendapatkan tanggal terakhir di bulan tersebut (contoh: 30 untuk April, 31 untuk Mei)
+        const lastDay = new Date(year, parseInt(selectedMonth), 0).getDate();
+        const endDate = `${year}-${selectedMonth}-${lastDay}`;
+
+        // FILTER SUPABASE: Menambahkan .gte dan .lte untuk filter bulan
         const { data: trans } = await supabase
           .from("transactions")
           .select("*, products!inner(nama_produk, hpp_per_unit, kategori)")
           .eq("user_id", user.id)
           .eq("products.kategori", businessType)
+          .gte("tanggal", startDate)
+          .lte("tanggal", endDate)
           .order("tanggal", { ascending: true });
 
         let totalIn = 0;
@@ -96,7 +108,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             totalIn += income;
             totalHpp += expense;
 
-            // LOGIKA GRAFIK: Simpan Income dan Profit harian
             if (!dailyData[t.tanggal])
               dailyData[t.tanggal] = {
                 name: t.tanggal.split("-").slice(1, 3).reverse().join("/"),
@@ -153,13 +164,14 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         console.error(err);
       }
     };
+
+    // Pastikan selectedMonth masuk ke dalam dependency array agar di-fetch ulang saat bulan diganti
     if (isLoggedIn) fetchDashboardData();
-  }, [isLoggedIn, businessType]);
+  }, [isLoggedIn, businessType, selectedMonth]);
 
   if (!isLoggedIn) {
     return (
       <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20 mt-10 px-4">
-        {/* Konten login tetap sama seperti kodemu sebelumnya */}
         <div className="bg-smart-card border border-smart-border p-8 md:p-16 rounded-[3rem] shadow-2xl transition-colors duration-300 overflow-hidden relative group">
           <div className="absolute -left-20 -top-20 w-64 h-64 bg-smart-lime/5 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -205,7 +217,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
 
   return (
     <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20 flex flex-col gap-6">
-      {/* TOP BAR */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-smart-card border border-smart-border p-5 rounded-[1.5rem] shadow-lg transition-colors duration-300">
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full lg:w-auto">
           <div className="relative w-full sm:w-auto">
@@ -223,9 +234,14 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             </span>
           </div>
           <div className="relative w-full sm:w-auto">
-            <select className="w-full bg-smart-bg border border-smart-border text-sm font-semibold rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors">
-              <option>Mei 2026</option>
-              <option>Bulan Lalu (April)</option>
+            {/* INPUT BULAN YANG SUDAH DINAMIS */}
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="w-full bg-smart-bg border border-smart-border text-sm font-semibold rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
+            >
+              <option value="04">April 2026</option>
+              <option value="05">Mei 2026</option>
             </select>
             <span className="material-icons-round absolute right-3 top-3 text-smart-text-muted pointer-events-none text-lg">
               calendar_today
@@ -250,7 +266,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         </div>
       </div>
 
-      {/* SECTION 1: METRICS (Tetap sama) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
@@ -321,7 +336,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         </div>
       </div>
 
-      {/* SECTION 2: CHART & PRODUCTS (DIUBAH KE REAL CHART) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col transition-colors duration-300">
           <div className="flex justify-between items-center mb-6">
@@ -384,7 +398,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                   insights
                 </span>
                 <p className="text-smart-text-muted text-sm italic">
-                  Belum ada data transaksi untuk grafik.
+                  Belum ada data transaksi di bulan ini.
                 </p>
               </div>
             )}
@@ -396,7 +410,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             Kinerja Spesifik Produk
           </h3>
           <p className="text-smart-text-muted text-xs mb-6">
-            Produk penopang laba tertinggi.
+            Produk penopang laba tertinggi di bulan ini.
           </p>
           <div className="space-y-4 flex-grow">
             {realData.products.length > 0 ? (
@@ -451,7 +465,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         </div>
       </div>
 
-      {/* SECTION 3: WARNING (Tetap sama) */}
       <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
