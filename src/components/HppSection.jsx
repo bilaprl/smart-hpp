@@ -375,7 +375,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
           recipeQty: i.takaran ?? "1",
         });
 
-        // Filter memisahkan sesuai tipe, jika data lama tidak ada tipe_biaya, diselamatkan ke main
         const mains = ing
           .filter((i) => i.tipe_biaya === "main" || !i.tipe_biaya)
           .map(mapRow);
@@ -561,7 +560,6 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         takaran: Number(row.recipeQty) || 0,
       }));
 
-      // SIMPAN KE SUPABASE DAN TANGKAP ERROR JIKA GAGAL!
       const { error: errFinal } = await supabase
         .from("recipe_items")
         .insert(ingredientsToSave);
@@ -571,11 +569,66 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
       window.location.reload();
     } catch (err) {
       console.error("SUPABASE ERROR DETAILS:", err);
-      // Tampilkan error aslinya agar ketahuan apa yang salah di database
       const pesanError =
         err.message || err.details || err.hint || JSON.stringify(err);
       alert(
         `⚠️ GAGAL MENYIMPAN DATA!\n\nAlasan: ${pesanError}\n\nPastikan kamu SUDAH MENAMBAHKAN 5 KOLOM BARU di Supabase!`,
+      );
+    }
+  };
+
+  // ==========================================
+  // FUNGSI HAPUS PRODUK YANG SUDAH DIPERBAIKI (TIDAK BOLEH NESTED)
+  // ==========================================
+  const handleDelete = async () => {
+    if (!isLoggedIn) return;
+    if (selectedProductId === "new") return;
+
+    try {
+      // Cek proteksi MIS
+      const { data: transCheck, error: errCheck } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("product_id", selectedProductId)
+        .limit(1);
+
+      if (errCheck) throw errCheck;
+
+      if (transCheck && transCheck.length > 0) {
+        alert(
+          `⛔ PENGHAPUSAN DITOLAK!\n\nProduk "${productName}" sudah memiliki riwayat penjualan di Dashboard.\n\nDalam standar Sistem Informasi (MIS), produk yang sudah masuk laporan keuangan tidak boleh dihapus karena akan merusak perhitungan Laba/Rugi sebelumnya.\n\n💡 Solusi: Cukup ganti nama produk ini menjadi "(TIDAK AKTIF) ${productName}" jika sudah tidak diproduksi lagi.`,
+        );
+        return;
+      }
+
+      const confirmDelete = window.confirm(
+        `⚠️ Apakah kamu yakin ingin menghapus produk "${productName}" secara permanen?\n\nSemua data modal bahan dan rincian produk ini akan hilang dari database.`,
+      );
+
+      if (!confirmDelete) return;
+
+      const { error: errDelRecipe } = await supabase
+        .from("recipe_items")
+        .delete()
+        .eq("product_id", selectedProductId);
+
+      if (errDelRecipe) throw errDelRecipe;
+
+      const { error: errDelProduct } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", selectedProductId);
+
+      if (errDelProduct) throw errDelProduct;
+
+      alert("🗑️ Produk berhasil dihapus bersih dari database!");
+      window.location.reload();
+    } catch (err) {
+      console.error("Gagal menghapus:", err);
+      const pesanError =
+        err.message || err.details || err.hint || JSON.stringify(err);
+      alert(
+        `⚠️ Terjadi kesalahan dari database saat menghapus data:\n${pesanError}`,
       );
     }
   };
@@ -901,13 +954,30 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
             </h3>
           </div>
 
-          <button
-            onClick={handleSave}
-            className="w-full bg-smart-lime text-smart-dark font-extrabold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-[0_4px_20px_rgba(212,245,66,0.3)] mt-auto text-base flex justify-center items-center gap-2"
-          >
-            <span className="material-icons-round">cloud_done</span>{" "}
-            {selectedProductId === "new" ? "Simpan Produk" : "Perbarui Produk"}
-          </button>
+          <div className="flex flex-col gap-3 mt-auto">
+            <button
+              onClick={handleSave}
+              className="w-full bg-smart-lime text-smart-dark font-extrabold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-[0_4px_20px_rgba(212,245,66,0.3)] text-base flex justify-center items-center gap-2"
+            >
+              <span className="material-icons-round">cloud_done</span>{" "}
+              {selectedProductId === "new"
+                ? "Simpan Produk"
+                : "Perbarui Produk"}
+            </button>
+
+            {/* TOMBOL HAPUS MUNCUL HANYA SAAT EDIT PRODUK */}
+            {selectedProductId !== "new" && (
+              <button
+                onClick={handleDelete}
+                className="w-full bg-transparent border border-red-500/50 text-red-500 font-bold py-3 rounded-xl hover:bg-red-500 hover:text-white transition-colors text-sm flex justify-center items-center gap-2"
+              >
+                <span className="material-icons-round text-sm">
+                  delete_forever
+                </span>{" "}
+                Hapus Produk Ini
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

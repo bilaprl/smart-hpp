@@ -12,6 +12,9 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
   const [riwayat, setRiwayat] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // STATE BARU: Untuk menyimpan pilihan bulan (Default: 04 untuk April)
+  const [selectedMonth, setSelectedMonth] = useState("04");
+
   // Helper Format Rupiah
   const formatRp = (num) => "Rp " + Math.round(num).toLocaleString("id-ID");
 
@@ -22,14 +25,22 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
   const pDarurat = valDarurat / total;
 
   // ==========================================
-  // FUNGSI HITUNG LABA (SINKRON DASHBOARD)
+  // FUNGSI HITUNG LABA DENGAN FILTER BULAN
   // ==========================================
-  const calculateLaba = useCallback(async (userId) => {
+  const calculateLaba = useCallback(async (userId, month) => {
     try {
+      // LOGIKA PENANGGALAN MIS
+      const year = 2026;
+      const startDate = `${year}-${month}-01`;
+      const lastDay = new Date(year, parseInt(month), 0).getDate();
+      const endDate = `${year}-${month}-${lastDay}`;
+
       const { data: trans, error: tError } = await supabase
         .from("transactions")
         .select("total_pendapatan, qty_terjual, products!inner(hpp_per_unit)")
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .gte("tanggal", startDate)
+        .lte("tanggal", endDate); // Filter berdasarkan bulan aktif
 
       if (!tError && trans) {
         let totalIn = 0;
@@ -65,8 +76,8 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Ambil data laba awal
-      await calculateLaba(user.id);
+      // 1. Ambil data laba awal (Berdasarkan selectedMonth)
+      await calculateLaba(user.id, selectedMonth);
 
       // 2. Ambil Riwayat Alokasi
       const { data: allocations, error: aError } = await supabase
@@ -81,11 +92,13 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
         setValModal(allocations[0].persen_modal);
         setValGaji(allocations[0].persen_gaji);
         setValDarurat(allocations[0].persen_tabungan);
+      } else {
+        setRiwayat([]);
       }
 
       // 3. Setup Realtime: Dengarkan perubahan di Dashboard
       transactionChannel = supabase
-        .channel(`schema-db-changes-${Date.now()}`) // <--- Buat namanya selalu unik
+        .channel(`schema-db-changes-${Date.now()}`)
         .on(
           "postgres_changes",
           {
@@ -98,7 +111,7 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
             console.log(
               "Perubahan terdeteksi di Dashboard! Update keuangan...",
             );
-            calculateLaba(user.id);
+            calculateLaba(user.id, selectedMonth);
           },
         )
         .subscribe();
@@ -108,11 +121,10 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
 
     if (isLoggedIn) initData();
 
-    // Cleanup saat pindah halaman
     return () => {
       if (transactionChannel) supabase.removeChannel(transactionChannel);
     };
-  }, [isLoggedIn, calculateLaba]);
+  }, [isLoggedIn, calculateLaba, selectedMonth]); // <--- selectedMonth masuk ke dependency agar kereload otomatis saat diganti
 
   // ==========================================
   // ACTION HANDLERS
@@ -126,18 +138,23 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
     if (!user) return;
 
     if (baseLaba <= 0) {
-      alert("Laba kamu masih Rp 0, catat penjualan dulu di Dashboard!");
+      alert(
+        `Laba bulan ${selectedMonth === "04" ? "April" : "Mei"} masih Rp 0, catat penjualan dulu di Dashboard!`,
+      );
       return;
     }
+
+    // Set tanggal simpan sesuai bulan yang sedang dipilih
+    const periodeSimpan = `2026-${selectedMonth}-01`;
 
     const { error } = await supabase.from("allocations").insert([
       {
         user_id: user.id,
-        periode_bulan: new Date().toISOString().split("T")[0],
+        periode_bulan: periodeSimpan,
         persen_modal: Math.round(Number(valModal)),
         persen_gaji: Math.round(Number(valGaji)),
         persen_tabungan: Math.round(Number(valDarurat)),
-        total_laba_saat_ini: Math.round(baseLaba), // Menggunakan kolom bigint yang baru ditambah
+        total_laba_saat_ini: Math.round(baseLaba),
       },
     ]);
 
@@ -203,24 +220,38 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
     <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20 flex flex-col gap-8 px-4">
       {/* HEADER CARD */}
       <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-300">
-        <div className="flex items-center gap-5 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-5 w-full md:w-auto">
           <div className="w-16 h-16 rounded-full bg-smart-lime/10 flex items-center justify-center border border-smart-lime/20 hidden sm:flex">
             <span className="material-icons-round text-smart-lime text-3xl">
               account_balance_wallet
             </span>
           </div>
-          <div>
+          <div className="text-center sm:text-left">
             <h2 className="font-montserrat font-bold text-2xl text-smart-text mb-1">
               Manajer Alokasi Laba
             </h2>
-            <p className="text-smart-text-muted text-sm">
+            <p className="text-smart-text-muted text-sm mb-3">
               Terhubung secara realtime dengan performa Dashboard Anda.
             </p>
+            {/* DROPDOWN FILTER BULAN */}
+            <div className="relative inline-block w-full sm:w-auto">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-full sm:w-auto bg-smart-bg border border-smart-border text-sm font-semibold rounded-xl pl-4 pr-10 py-2 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
+              >
+                <option value="04">April 2026</option>
+                <option value="05">Mei 2026</option>
+              </select>
+              <span className="material-icons-round absolute right-3 top-2 text-smart-text-muted pointer-events-none text-lg">
+                calendar_today
+              </span>
+            </div>
           </div>
         </div>
-        <div className="text-left md:text-right w-full md:w-auto bg-smart-bg p-5 rounded-2xl border border-smart-border shadow-inner transition-colors">
+        <div className="text-center md:text-right w-full md:w-auto bg-smart-bg p-5 rounded-2xl border border-smart-border shadow-inner transition-colors">
           <p className="text-smart-text-muted text-xs font-bold uppercase tracking-wider mb-1">
-            Total Laba Bersih 
+            Total Laba Bersih ({selectedMonth === "04" ? "April" : "Mei"})
           </p>
           <h1 className="font-montserrat font-extrabold text-3xl md:text-4xl text-smart-lime drop-shadow-md">
             {isLoading ? "..." : formatRp(baseLaba)}
@@ -365,8 +396,8 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
             onClick={handleSimpanAlokasi}
             className="w-full bg-smart-text text-smart-bg font-black py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-lg flex justify-center items-center gap-2 mt-auto"
           >
-            <span className="material-icons-round">save</span> Simpan Persentase
-            Alokasi
+            <span className="material-icons-round">save</span> Simpan Alokasi{" "}
+            {selectedMonth === "04" ? "April" : "Mei"}
           </button>
         </div>
       </div>
@@ -392,36 +423,47 @@ export default function KeuanganSection({ isLoggedIn, openModal }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/50">
-              {riwayat.map((row, index) => (
-                <tr
-                  key={index}
-                  className="group hover:bg-smart-border/30 transition-colors"
-                >
-                  <td className="py-4 text-smart-text font-semibold">
-                    {new Date(row.periode_bulan).toLocaleDateString("id-ID", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="py-4 font-bold text-smart-lime">
-                    {formatRp(row.total_laba_saat_ini || 0)}
-                  </td>
-                  <td className="py-4 text-center text-smart-text-muted">
-                    {row.persen_modal}%
-                  </td>
-                  <td className="py-4 text-center text-smart-text-muted">
-                    {row.persen_gaji}%
-                  </td>
-                  <td className="py-4 text-center text-smart-text-muted">
-                    {row.persen_tabungan}%
-                  </td>
-                  <td className="py-4 text-right">
-                    <span className="bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-full text-xs font-bold">
-                      Tersimpan
-                    </span>
+              {riwayat.length > 0 ? (
+                riwayat.map((row, index) => (
+                  <tr
+                    key={index}
+                    className="group hover:bg-smart-border/30 transition-colors"
+                  >
+                    <td className="py-4 text-smart-text font-semibold">
+                      {new Date(row.periode_bulan).toLocaleDateString("id-ID", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="py-4 font-bold text-smart-lime">
+                      {formatRp(row.total_laba_saat_ini || 0)}
+                    </td>
+                    <td className="py-4 text-center text-smart-text-muted">
+                      {row.persen_modal}%
+                    </td>
+                    <td className="py-4 text-center text-smart-text-muted">
+                      {row.persen_gaji}%
+                    </td>
+                    <td className="py-4 text-center text-smart-text-muted">
+                      {row.persen_tabungan}%
+                    </td>
+                    <td className="py-4 text-right">
+                      <span className="bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                        Tersimpan
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="py-10 text-center text-smart-text-muted font-semibold italic opacity-50"
+                  >
+                    Belum ada riwayat alokasi laba.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
