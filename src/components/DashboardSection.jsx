@@ -15,16 +15,10 @@ import {
 
 export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
   const [businessType, setBusinessType] = useState("produksi");
-
-  // STATE BARU: Untuk menyimpan pilihan bulan (Default: 04 untuk April)
   const [selectedMonth, setSelectedMonth] = useState("04");
 
-  // STATE BARU: Untuk menyimpan input Beban Operasional Lainnya (Sewa, Iklan, dll)
-  const [opex, setOpex] = useState("");
-
   const [realData, setRealData] = useState({
-    // Tambah kotorRaw agar bisa dikurangi secara matematis dengan input OPEX
-    metrics: { in: "0", hpp: "0", kotor: "0", kotorRaw: 0 },
+    metrics: { in: "0", hpp: "0", kotor: "0", bersih: "0" },
     products: [],
     warnings: [],
     chartData: [],
@@ -54,11 +48,10 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
     const doc = new jsPDF();
     const monthName = selectedMonth === "04" ? "April" : "Mei";
 
-    // Update judul PDF sesuai bulan yang dipilih
     doc.text(`Laporan SmartHPP - ${businessType} (${monthName} 2026)`, 14, 15);
 
     autoTable(doc, {
-      head: [["Nama Produk", "Terjual", "Pemasukan", "Laba Kotor"]],
+      head: [["Nama Produk", "Terjual", "Pemasukan", "Laba"]],
       body: realData.products.map((p) => [p.name, p.qty, p.rev, p.profit]),
       startY: 25,
       styles: { font: "helvetica", fontSize: 10 },
@@ -81,14 +74,11 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         } = await supabase.auth.getUser();
         if (!user) return;
 
-        // LOGIKA PENANGGALAN: Mencari rentang tanggal untuk bulan yang dipilih
         const year = 2026;
         const startDate = `${year}-${selectedMonth}-01`;
-        // Mendapatkan tanggal terakhir di bulan tersebut (contoh: 30 untuk April, 31 untuk Mei)
         const lastDay = new Date(year, parseInt(selectedMonth), 0).getDate();
         const endDate = `${year}-${selectedMonth}-${lastDay}`;
 
-        // FILTER SUPABASE: Menambahkan .gte dan .lte untuk filter bulan
         const { data: trans } = await supabase
           .from("transactions")
           .select("*, products!inner(nama_produk, hpp_per_unit, kategori)")
@@ -142,12 +132,14 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
           .order("biaya_porsi", { ascending: false })
           .limit(3);
 
+        const labaData = totalIn - totalHpp;
+
         setRealData({
           metrics: {
             in: totalIn.toLocaleString("id-ID"),
             hpp: totalHpp.toLocaleString("id-ID"),
-            kotor: (totalIn - totalHpp).toLocaleString("id-ID"),
-            kotorRaw: totalIn - totalHpp, // Disimpan mentah untuk dikurangi OPEX nanti
+            kotor: labaData.toLocaleString("id-ID"),
+            bersih: labaData.toLocaleString("id-ID"),
           },
           products: Object.keys(productStats).map((name) => ({
             name,
@@ -169,7 +161,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
       }
     };
 
-    // Pastikan selectedMonth masuk ke dalam dependency array agar di-fetch ulang saat bulan diganti
     if (isLoggedIn) fetchDashboardData();
   }, [isLoggedIn, businessType, selectedMonth]);
 
@@ -314,59 +305,28 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             </div>
           </div>
           <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
-            Laba Kotor (Gross)
+            Laba Kotor
           </p>
           <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-text relative z-10">
             Rp {realData.metrics.kotor}
           </h3>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group flex flex-col justify-between">
+        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-smart-lime/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div>
-            <div className="flex justify-between items-start mb-2">
-              <div className="w-12 h-12 bg-smart-lime/10 rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
-                <span className="material-icons-round text-smart-lime">
-                  monetization_on
-                </span>
-              </div>
-            </div>
-            <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
-              Laba Bersih (Net Profit)
-            </p>
-            {/* Rumus Laba Bersih = Laba Kotor - OPEX */}
-            <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
-              Rp{" "}
-              {(realData.metrics.kotorRaw - (Number(opex) || 0)).toLocaleString(
-                "id-ID",
-              )}
-            </h3>
-          </div>
-
-          {/* INPUT BEBAN OPEX DINAMIS */}
-          <div className="relative z-10 mt-4 border-t border-smart-border/60 pt-3">
-            <label className="text-[10px] uppercase font-bold text-smart-text-muted mb-1 block flex justify-between items-center">
-              Kurangi Beban Lain (Sewa/Gaji)
-              <span
-                className="material-icons-round text-[12px] cursor-help"
-                title="Masukkan biaya operasional bulanan di luar produksi (Misal: Sewa ruko, tagihan iklan FB, dll)"
-              >
-                info
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 bg-smart-lime/10 rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
+              <span className="material-icons-round text-smart-lime">
+                monetization_on
               </span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-2 text-xs font-bold text-smart-text-muted">
-                Rp
-              </span>
-              <input
-                type="number"
-                value={opex}
-                onChange={(e) => setOpex(e.target.value)}
-                placeholder="0"
-                className="w-full bg-smart-bg border border-smart-border rounded-lg pl-8 pr-2 py-1.5 text-xs font-bold text-smart-text focus:border-smart-lime outline-none transition-colors"
-              />
             </div>
           </div>
+          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+            Laba Bersih Keseluruhan
+          </p>
+          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
+            Rp {realData.metrics.bersih}
+          </h3>
         </div>
       </div>
 
@@ -378,7 +338,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                 Visualisasi Tren Riwayat
               </h3>
               <p className="text-smart-text-muted text-xs mt-1">
-                Pemasukan vs Laba Kotor Harian
+                Pemasukan vs Laba Bersih
               </p>
             </div>
           </div>
@@ -422,7 +382,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                     stroke="#d4f542"
                     strokeWidth={4}
                     dot={{ r: 4, fill: "#d4f542" }}
-                    name="Laba Kotor"
+                    name="Laba Bersih"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -472,7 +432,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] text-smart-text-muted uppercase font-semibold">
-                        Laba Kotor
+                        Laba Bersih
                       </p>
                       <p className="text-sm font-bold text-smart-lime">
                         {prod.profit}
