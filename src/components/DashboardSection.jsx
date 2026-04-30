@@ -19,8 +19,12 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
   // STATE BARU: Untuk menyimpan pilihan bulan (Default: 04 untuk April)
   const [selectedMonth, setSelectedMonth] = useState("04");
 
+  // STATE BARU: Untuk menyimpan input Beban Operasional Lainnya (Sewa, Iklan, dll)
+  const [opex, setOpex] = useState("");
+
   const [realData, setRealData] = useState({
-    metrics: { in: "0", hpp: "0", kotor: "0", bersih: "0" },
+    // Tambah kotorRaw agar bisa dikurangi secara matematis dengan input OPEX
+    metrics: { in: "0", hpp: "0", kotor: "0", kotorRaw: 0 },
     products: [],
     warnings: [],
     chartData: [],
@@ -54,7 +58,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
     doc.text(`Laporan SmartHPP - ${businessType} (${monthName} 2026)`, 14, 15);
 
     autoTable(doc, {
-      head: [["Nama Produk", "Terjual", "Pemasukan", "Laba"]],
+      head: [["Nama Produk", "Terjual", "Pemasukan", "Laba Kotor"]],
       body: realData.products.map((p) => [p.name, p.qty, p.rev, p.profit]),
       startY: 25,
       styles: { font: "helvetica", fontSize: 10 },
@@ -143,7 +147,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             in: totalIn.toLocaleString("id-ID"),
             hpp: totalHpp.toLocaleString("id-ID"),
             kotor: (totalIn - totalHpp).toLocaleString("id-ID"),
-            bersih: (totalIn - totalHpp).toLocaleString("id-ID"),
+            kotorRaw: totalIn - totalHpp, // Disimpan mentah untuk dikurangi OPEX nanti
           },
           products: Object.keys(productStats).map((name) => ({
             name,
@@ -234,7 +238,6 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             </span>
           </div>
           <div className="relative w-full sm:w-auto">
-            {/* INPUT BULAN YANG SUDAH DINAMIS */}
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
@@ -311,28 +314,59 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             </div>
           </div>
           <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
-            Laba Kotor
+            Laba Kotor (Gross)
           </p>
           <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-text relative z-10">
             Rp {realData.metrics.kotor}
           </h3>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
+        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group flex flex-col justify-between">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-smart-lime/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-smart-lime/10 rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
-              <span className="material-icons-round text-smart-lime">
-                monetization_on
+          <div>
+            <div className="flex justify-between items-start mb-2">
+              <div className="w-12 h-12 bg-smart-lime/10 rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
+                <span className="material-icons-round text-smart-lime">
+                  monetization_on
+                </span>
+              </div>
+            </div>
+            <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+              Laba Bersih (Net Profit)
+            </p>
+            {/* Rumus Laba Bersih = Laba Kotor - OPEX */}
+            <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
+              Rp{" "}
+              {(realData.metrics.kotorRaw - (Number(opex) || 0)).toLocaleString(
+                "id-ID",
+              )}
+            </h3>
+          </div>
+
+          {/* INPUT BEBAN OPEX DINAMIS */}
+          <div className="relative z-10 mt-4 border-t border-smart-border/60 pt-3">
+            <label className="text-[10px] uppercase font-bold text-smart-text-muted mb-1 block flex justify-between items-center">
+              Kurangi Beban Lain (Sewa/Gaji)
+              <span
+                className="material-icons-round text-[12px] cursor-help"
+                title="Masukkan biaya operasional bulanan di luar produksi (Misal: Sewa ruko, tagihan iklan FB, dll)"
+              >
+                info
               </span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-xs font-bold text-smart-text-muted">
+                Rp
+              </span>
+              <input
+                type="number"
+                value={opex}
+                onChange={(e) => setOpex(e.target.value)}
+                placeholder="0"
+                className="w-full bg-smart-bg border border-smart-border rounded-lg pl-8 pr-2 py-1.5 text-xs font-bold text-smart-text focus:border-smart-lime outline-none transition-colors"
+              />
             </div>
           </div>
-          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
-            Laba Bersih Keseluruhan
-          </p>
-          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
-            Rp {realData.metrics.bersih}
-          </h3>
         </div>
       </div>
 
@@ -344,7 +378,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                 Visualisasi Tren Riwayat
               </h3>
               <p className="text-smart-text-muted text-xs mt-1">
-                Pemasukan vs Laba Bersih
+                Pemasukan vs Laba Kotor Harian
               </p>
             </div>
           </div>
@@ -388,7 +422,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                     stroke="#d4f542"
                     strokeWidth={4}
                     dot={{ r: 4, fill: "#d4f542" }}
-                    name="Laba Bersih"
+                    name="Laba Kotor"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -438,7 +472,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] text-smart-text-muted uppercase font-semibold">
-                        Laba Bersih
+                        Laba Kotor
                       </p>
                       <p className="text-sm font-bold text-smart-lime">
                         {prod.profit}
