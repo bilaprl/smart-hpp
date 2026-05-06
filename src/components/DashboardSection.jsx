@@ -166,36 +166,38 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
 
   if (!isLoggedIn) {
     return (
-      <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20 mt-10 px-4">
-        <div className="bg-smart-card border border-smart-border p-8 md:p-16 rounded-[3rem] shadow-2xl transition-colors duration-300 overflow-hidden relative group">
-          <div className="absolute -left-20 -top-20 w-64 h-64 bg-smart-lime/5 blur-[100px] rounded-full pointer-events-none"></div>
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <div className="animate-fade-in w-full max-w-7xl mx-auto pb-16 md:pb-20 mt-6 md:mt-10 px-4 sm:px-6">
+        <div className="bg-smart-card border border-smart-border p-6 sm:p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-2xl transition-colors duration-300 overflow-hidden relative group">
+          <div className="absolute -left-20 -top-20 w-48 h-48 md:w-64 md:h-64 bg-smart-lime/5 blur-[80px] md:blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="flex flex-col lg:flex-row items-center gap-10 md:gap-12 lg:gap-16">
             <div className="w-full lg:w-1/2 text-left z-10">
-              <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-8 border border-red-500/20 shadow-lg">
-                <span className="material-icons-round text-4xl">lock</span>
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-red-500/10 text-red-500 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 border border-red-500/20 shadow-lg">
+                <span className="material-icons-round text-3xl md:text-4xl">
+                  lock
+                </span>
               </div>
-              <h2 className="font-montserrat font-black text-3xl md:text-5xl text-smart-text mb-6 leading-tight transition-colors">
+              <h2 className="font-montserrat font-black text-3xl md:text-5xl text-smart-text mb-4 md:mb-6 leading-tight transition-colors">
                 Pantau Performa Bisnis dalam{" "}
                 <span className="text-smart-lime italic font-serif">
                   Satu Genggaman.
                 </span>
               </h2>
-              <p className="text-smart-text-muted mb-10 text-lg leading-relaxed transition-colors max-w-lg">
+              <p className="text-smart-text-muted mb-8 md:mb-10 text-base md:text-lg leading-relaxed transition-colors max-w-lg">
                 Masuk ke akun Anda untuk membuka fitur <b>Real-Time Insight</b>,
                 grafik laba-rugi otomatis, dan evaluasi bahan baku yang paling
                 menguras margin usaha Anda.
               </p>
               <button
                 onClick={() => openModal("auth")}
-                className="bg-smart-lime text-smart-dark font-black px-8 py-4 rounded-2xl hover:scale-105 transition-all duration-300 text-lg shadow-[0_10px_30px_rgba(212,245,66,0.3)] flex items-center gap-3 w-full sm:w-auto justify-center"
+                className="bg-smart-lime text-smart-dark font-black px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl hover:scale-105 transition-all duration-300 text-base md:text-lg shadow-[0_10px_30px_rgba(212,245,66,0.3)] flex items-center gap-2 md:gap-3 w-full sm:w-auto justify-center"
               >
                 Masuk Sekarang
               </button>
             </div>
-            <div className="w-full lg:w-1/2 relative z-10">
+            <div className="w-full lg:w-1/2 relative z-10 mt-6 lg:mt-0">
               <div className="relative group/image">
-                <div className="absolute -inset-4 bg-smart-lime/10 blur-2xl rounded-[2rem] opacity-30 group-hover/image:opacity-60 transition-opacity"></div>
-                <div className="relative bg-smart-bg border-4 border-smart-border rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-300">
+                <div className="absolute -inset-4 bg-smart-lime/10 blur-xl md:blur-2xl rounded-[1.5rem] md:rounded-[2rem] opacity-30 group-hover/image:opacity-60 transition-opacity"></div>
+                <div className="relative bg-smart-bg border-4 border-smart-border rounded-[1.5rem] md:rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-300">
                   <img
                     src="/Dashboard.png"
                     alt="Preview"
@@ -211,20 +213,21 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
   }
 
   return (
-    <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20 flex flex-col gap-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-smart-card border border-smart-border p-5 rounded-[1.5rem] shadow-lg transition-colors duration-300">
-        <div className="flex flex-col sm:flex-row gap-4 items-center w-full lg:w-auto">
+    <div className="animate-fade-in w-full max-w-7xl mx-auto pb-16 md:pb-20 flex flex-col gap-4 md:gap-6">
+      {/* KONTROL HEADER */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-smart-card border border-smart-border p-4 sm:p-5 rounded-[1.25rem] sm:rounded-[1.5rem] shadow-lg transition-colors duration-300">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center w-full lg:w-auto">
           <div className="relative w-full sm:w-auto">
             <select
               value={businessType}
               onChange={(e) => setBusinessType(e.target.value)}
-              className="w-full bg-smart-bg border border-smart-border text-sm font-semibold rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
+              className="w-full bg-smart-bg border border-smart-border text-xs sm:text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 sm:py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
             >
               <option value="produksi">Tipe Bisnis: Produksi (F&B)</option>
               <option value="retail">Retail - Beli Jual</option>
               <option value="jasa">Jasa / Pelayanan</option>
             </select>
-            <span className="material-icons-round absolute right-3 top-3 text-smart-text-muted pointer-events-none text-lg">
+            <span className="material-icons-round absolute right-3 top-2.5 sm:top-3 text-smart-text-muted pointer-events-none text-base sm:text-lg">
               expand_more
             </span>
           </div>
@@ -232,12 +235,12 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full bg-smart-bg border border-smart-border text-sm font-semibold rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
+              className="w-full bg-smart-bg border border-smart-border text-xs sm:text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 sm:py-3 focus:outline-none focus:border-smart-lime text-smart-text appearance-none cursor-pointer transition-colors"
             >
               <option value="04">April 2026</option>
               <option value="05">Mei 2026</option>
             </select>
-            <span className="material-icons-round absolute right-3 top-3 text-smart-text-muted pointer-events-none text-lg">
+            <span className="material-icons-round absolute right-3 top-2.5 sm:top-3 text-smart-text-muted pointer-events-none text-base sm:text-lg">
               calendar_today
             </span>
           </div>
@@ -245,104 +248,110 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <button
             onClick={() => openModal("transaction")}
-            className="bg-gradient-to-r from-smart-lime to-[#b7d62b] text-smart-dark font-bold text-sm px-6 py-3 rounded-xl flex items-center justify-center gap-2 w-full sm:w-auto hover:scale-105 transition-transform shadow-[0_4px_15px_rgba(212,245,66,0.2)]"
+            className="bg-gradient-to-r from-smart-lime to-[#b7d62b] text-smart-dark font-bold text-xs sm:text-sm px-5 py-2.5 sm:py-3 rounded-xl flex items-center justify-center gap-2 w-full sm:w-auto hover:scale-105 transition-transform shadow-[0_4px_15px_rgba(212,245,66,0.2)]"
           >
-            <span className="material-icons-round text-lg">add</span> Update
-            Penjualan
+            <span className="material-icons-round text-base sm:text-lg">
+              add
+            </span>{" "}
+            Update Penjualan
           </button>
           <button
             onClick={handleDownloadPDF}
-            className="bg-smart-bg border border-smart-border text-sm font-semibold text-smart-text px-6 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-smart-border transition-colors w-full sm:w-auto"
+            className="bg-smart-bg border border-smart-border text-xs sm:text-sm font-semibold text-smart-text px-5 py-2.5 sm:py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-smart-border transition-colors w-full sm:w-auto"
           >
-            <span className="material-icons-round text-lg">picture_as_pdf</span>{" "}
+            <span className="material-icons-round text-base sm:text-lg">
+              picture_as_pdf
+            </span>{" "}
             Unduh PDF
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 z-10">
-              <span className="material-icons-round text-blue-500">
+      {/* METRIK KEUANGAN */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="bg-smart-card border border-smart-border p-5 md:p-6 rounded-[1.25rem] md:rounded-[2rem] shadow-xl relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-16 h-16 md:w-20 md:h-20 bg-blue-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/10 rounded-xl md:rounded-2xl flex items-center justify-center border border-blue-500/20 z-10">
+              <span className="material-icons-round text-blue-500 text-xl md:text-2xl">
                 account_balance_wallet
               </span>
             </div>
           </div>
-          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+          <p className="text-smart-text-muted text-xs md:text-sm font-semibold mb-1 relative z-10">
             Total Pemasukan
           </p>
-          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-text relative z-10">
+          <h3 className="font-montserrat font-bold text-xl sm:text-2xl lg:text-3xl text-smart-text relative z-10">
             Rp {realData.metrics.in}
           </h3>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-red-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 z-10">
-              <span className="material-icons-round text-red-500">
+        <div className="bg-smart-card border border-smart-border p-5 md:p-6 rounded-[1.25rem] md:rounded-[2rem] shadow-xl relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-16 h-16 md:w-20 md:h-20 bg-red-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-red-500/10 rounded-xl md:rounded-2xl flex items-center justify-center border border-red-500/20 z-10">
+              <span className="material-icons-round text-red-500 text-xl md:text-2xl">
                 shopping_cart
               </span>
             </div>
           </div>
-          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+          <p className="text-smart-text-muted text-xs md:text-sm font-semibold mb-1 relative z-10">
             {active.metrics.hppLabel}
           </p>
-          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-text relative z-10">
+          <h3 className="font-montserrat font-bold text-xl sm:text-2xl lg:text-3xl text-smart-text relative z-10">
             Rp {realData.metrics.hpp}
           </h3>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 z-10">
-              <span className="material-icons-round text-purple-500">
+        <div className="bg-smart-card border border-smart-border p-5 md:p-6 rounded-[1.25rem] md:rounded-[2rem] shadow-xl relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-16 h-16 md:w-20 md:h-20 bg-purple-500/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-500/10 rounded-xl md:rounded-2xl flex items-center justify-center border border-purple-500/20 z-10">
+              <span className="material-icons-round text-purple-500 text-xl md:text-2xl">
                 payments
               </span>
             </div>
           </div>
-          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+          <p className="text-smart-text-muted text-xs md:text-sm font-semibold mb-1 relative z-10">
             Laba Kotor
           </p>
-          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-text relative z-10">
+          <h3 className="font-montserrat font-bold text-xl sm:text-2xl lg:text-3xl text-smart-text relative z-10">
             Rp {realData.metrics.kotor}
           </h3>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 rounded-[2rem] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-smart-lime/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-smart-lime/10 rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
-              <span className="material-icons-round text-smart-lime">
+        <div className="bg-smart-card border border-smart-border p-5 md:p-6 rounded-[1.25rem] md:rounded-[2rem] shadow-xl relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-16 h-16 md:w-20 md:h-20 bg-smart-lime/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-smart-lime/10 rounded-xl md:rounded-2xl flex items-center justify-center border border-smart-lime/20 z-10">
+              <span className="material-icons-round text-smart-lime text-xl md:text-2xl">
                 monetization_on
               </span>
             </div>
           </div>
-          <p className="text-smart-text-muted text-sm font-semibold mb-1 relative z-10">
+          <p className="text-smart-text-muted text-xs md:text-sm font-semibold mb-1 relative z-10">
             Laba Bersih Keseluruhan
           </p>
-          <h3 className="font-montserrat font-bold text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
+          <h3 className="font-montserrat font-bold text-xl sm:text-2xl lg:text-3xl text-smart-lime drop-shadow-md relative z-10">
             Rp {realData.metrics.bersih}
           </h3>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col transition-colors duration-300">
-          <div className="flex justify-between items-center mb-6">
+      {/* CHART DAN TOP PRODUK */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="lg:col-span-2 bg-smart-card border border-smart-border p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl flex flex-col transition-colors duration-300">
+          <div className="flex justify-between items-center mb-4 md:mb-6">
             <div>
-              <h3 className="font-montserrat font-bold text-lg text-smart-text">
+              <h3 className="font-montserrat font-bold text-base md:text-lg text-smart-text">
                 Visualisasi Tren Riwayat
               </h3>
-              <p className="text-smart-text-muted text-xs mt-1">
+              <p className="text-smart-text-muted text-[10px] md:text-xs mt-1">
                 Pemasukan vs Laba Bersih
               </p>
             </div>
           </div>
-          <div className="flex-grow bg-smart-bg rounded-2xl border border-smart-border p-2 md:p-4 h-64 relative transition-colors">
+          <div className="flex-grow bg-smart-bg rounded-[1rem] md:rounded-2xl border border-smart-border p-2 md:p-4 h-56 sm:h-64 relative transition-colors">
             {realData.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={realData.chartData}>
@@ -388,10 +397,10 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
               </ResponsiveContainer>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <span className="material-icons-round text-4xl text-smart-border mb-2">
+                <span className="material-icons-round text-3xl md:text-4xl text-smart-border mb-2">
                   insights
                 </span>
-                <p className="text-smart-text-muted text-sm italic">
+                <p className="text-smart-text-muted text-xs md:text-sm italic px-4">
                   Belum ada data transaksi di bulan ini.
                 </p>
               </div>
@@ -399,42 +408,42 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
           </div>
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col transition-colors duration-300">
-          <h3 className="font-montserrat font-bold text-lg text-smart-text mb-1">
+        <div className="bg-smart-card border border-smart-border p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl flex flex-col transition-colors duration-300">
+          <h3 className="font-montserrat font-bold text-base md:text-lg text-smart-text mb-1">
             Kinerja Spesifik Produk
           </h3>
-          <p className="text-smart-text-muted text-xs mb-6">
+          <p className="text-smart-text-muted text-[10px] md:text-xs mb-4 md:mb-6">
             Produk penopang laba tertinggi di bulan ini.
           </p>
-          <div className="space-y-4 flex-grow">
+          <div className="space-y-3 md:space-y-4 flex-grow">
             {realData.products.length > 0 ? (
               realData.products.map((prod, i) => (
                 <div
                   key={i}
-                  className="bg-smart-bg border border-smart-border p-4 rounded-2xl flex flex-col gap-2 hover:border-smart-lime/50 transition-colors"
+                  className="bg-smart-bg border border-smart-border p-3 md:p-4 rounded-xl md:rounded-2xl flex flex-col gap-2 hover:border-smart-lime/50 transition-colors"
                 >
                   <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-smart-text text-sm">
+                    <h4 className="font-bold text-smart-text text-xs md:text-sm">
                       {prod.name}
                     </h4>
-                    <span className="text-xs bg-smart-border text-smart-text-muted px-2 py-1 rounded-md">
+                    <span className="text-[10px] md:text-xs bg-smart-border text-smart-text-muted px-2 py-1 rounded-md">
                       {prod.qty}
                     </span>
                   </div>
                   <div className="flex justify-between items-end mt-1">
                     <div>
-                      <p className="text-[10px] text-smart-text-muted uppercase font-semibold">
+                      <p className="text-[9px] md:text-[10px] text-smart-text-muted uppercase font-semibold">
                         Pemasukan
                       </p>
-                      <p className="text-sm font-semibold text-smart-text">
+                      <p className="text-xs md:text-sm font-semibold text-smart-text">
                         {prod.rev}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-smart-text-muted uppercase font-semibold">
+                      <p className="text-[9px] md:text-[10px] text-smart-text-muted uppercase font-semibold">
                         Laba Bersih
                       </p>
-                      <p className="text-sm font-bold text-smart-lime">
+                      <p className="text-xs md:text-sm font-bold text-smart-lime">
                         {prod.profit}
                       </p>
                     </div>
@@ -442,46 +451,53 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                 </div>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center h-full opacity-30 py-10 border-2 border-dashed border-smart-border rounded-2xl">
-                <span className="material-icons-round text-5xl mb-2">
+              <div className="flex flex-col items-center justify-center h-full opacity-30 py-8 md:py-10 border-2 border-dashed border-smart-border rounded-xl md:rounded-2xl">
+                <span className="material-icons-round text-4xl md:text-5xl mb-2">
                   inventory_2
                 </span>
-                <p className="text-sm italic font-bold">Data Produk Kosong</p>
+                <p className="text-xs md:text-sm italic font-bold">
+                  Data Produk Kosong
+                </p>
               </div>
             )}
           </div>
           <button
             onClick={() => navigate("hpp")}
-            className="w-full mt-4 text-xs font-bold text-smart-text-muted hover:text-smart-text transition-colors"
+            className="w-full mt-4 text-[10px] md:text-xs font-bold text-smart-text-muted hover:text-smart-text transition-colors"
           >
             Lihat Semua Produk &rarr;
           </button>
         </div>
       </div>
 
-      <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-            <span className="material-icons-round text-red-500 text-xl">
+      {/* TABEL PERINGATAN */}
+      <div className="bg-smart-card border border-smart-border p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl transition-colors duration-300">
+        <div className="flex items-center gap-3 mb-4 md:mb-6">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 flex-shrink-0">
+            <span className="material-icons-round text-red-500 text-lg md:text-xl">
               warning_amber
             </span>
           </div>
-          <h3 className="font-montserrat font-bold text-lg text-smart-text">
+          <h3 className="font-montserrat font-bold text-sm md:text-lg text-smart-text leading-tight">
             Perhatian: {active.warning.col} Membebani Biaya
           </h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[700px]">
+        <div className="overflow-x-auto pb-2">
+          <table className="w-full text-left text-sm min-w-[600px]">
             <thead>
-              <tr className="text-smart-text-muted border-b border-smart-border/80 text-xs uppercase tracking-wider">
-                <th className="pb-4 font-semibold w-[30%]">
+              <tr className="text-smart-text-muted border-b border-smart-border/80 text-[10px] md:text-xs uppercase tracking-wider">
+                <th className="pb-3 md:pb-4 font-semibold w-[35%] md:w-[30%]">
                   {active.warning.col}
                 </th>
-                <th className="pb-4 font-semibold w-[20%]">Total Biaya</th>
-                <th className="pb-4 font-semibold w-[30%]">
+                <th className="pb-3 md:pb-4 font-semibold w-[20%]">
+                  Total Biaya
+                </th>
+                <th className="pb-3 md:pb-4 font-semibold w-[25%] md:w-[30%]">
                   Terikat Pada Produk
                 </th>
-                <th className="pb-4 font-semibold w-[20%]">Status Evaluasi</th>
+                <th className="pb-3 md:pb-4 font-semibold w-[20%]">
+                  Status Evaluasi
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/50">
@@ -491,15 +507,17 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                     key={i}
                     className="group hover:bg-smart-border/30 transition-colors"
                   >
-                    <td className="py-4 text-smart-text font-bold">{w.name}</td>
-                    <td className="py-4 font-semibold text-red-500">
+                    <td className="py-3 md:py-4 text-smart-text font-bold text-xs md:text-sm">
+                      {w.name}
+                    </td>
+                    <td className="py-3 md:py-4 font-semibold text-red-500 text-xs md:text-sm">
                       {w.price}
                     </td>
-                    <td className="py-4 text-smart-text-muted text-xs font-bold italic">
+                    <td className="py-3 md:py-4 text-smart-text-muted text-[10px] md:text-xs font-bold italic">
                       {w.link}
                     </td>
-                    <td className="py-4">
-                      <span className="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-bold uppercase">
+                    <td className="py-3 md:py-4">
+                      <span className="bg-red-500/10 text-red-500 border border-red-500/20 px-2 md:px-3 py-1 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold uppercase whitespace-nowrap">
                         Beban Tinggi
                       </span>
                     </td>
@@ -509,7 +527,7 @@ export default function DashboardSection({ isLoggedIn, openModal, navigate }) {
                 <tr>
                   <td
                     colSpan="4"
-                    className="py-10 text-center text-smart-text-muted opacity-40 font-semibold italic"
+                    className="py-8 md:py-10 text-center text-smart-text-muted opacity-40 font-semibold italic text-xs md:text-sm"
                   >
                     Tidak ada peringatan biaya.
                   </td>

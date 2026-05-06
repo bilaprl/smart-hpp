@@ -1,9 +1,20 @@
 import "./globals.css";
 import { ThemeProvider } from "../components/ThemeContext";
 
+// META DATA STANDAR
 export const metadata = {
   title: "SmartHPP - Solusi Keuangan UMKM",
   description: "Sistem manajemen keuangan cerdas untuk UMKM.",
+};
+
+// ==========================================
+// PENGATURAN VIEWPORT MOBILE (SANGAT PENTING!)
+// ==========================================
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {

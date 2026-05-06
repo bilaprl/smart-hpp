@@ -29,29 +29,37 @@ const TableGroup = ({
         : "receipt_long";
 
   return (
-    <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
-      <div className="mb-6 border-b border-smart-border pb-4">
-        <h3 className="font-montserrat font-bold text-lg text-smart-text flex items-center gap-2">
+    <div className="bg-smart-card border border-smart-border p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl transition-colors duration-300">
+      <div className="mb-4 md:mb-6 border-b border-smart-border pb-3 md:pb-4">
+        <h3 className="font-montserrat font-bold text-base md:text-lg text-smart-text flex items-center gap-2">
           <span className={`material-icons-round ${iconColor}`}>
             {iconName}
           </span>
           {title}
         </h3>
-        <p className="text-smart-text-muted text-sm mt-1 ml-8">{desc}</p>
+        <p className="text-smart-text-muted text-xs md:text-sm mt-1 md:ml-8 leading-relaxed">
+          {desc}
+        </p>
       </div>
 
       <div className="overflow-x-auto pb-4">
-        <table className="w-full text-left text-sm min-w-[900px]">
+        <table className="w-full text-left text-sm min-w-[800px] md:min-w-[900px]">
           <thead>
-            <tr className="text-smart-text-muted border-b border-smart-border/80 text-[11px] uppercase tracking-wider">
-              <th className="pb-4 font-semibold w-[22%]">{colName}</th>
-              <th className="pb-4 font-semibold w-[18%]">{labels.price}</th>
-              <th className="pb-4 font-semibold w-[15%]">{labels.vol}</th>
-              <th className="pb-4 font-semibold w-[12%]">{labels.unit}</th>
-              <th className="pb-4 font-semibold w-[15%] text-smart-lime">
+            <tr className="text-smart-text-muted border-b border-smart-border/80 text-[10px] md:text-[11px] uppercase tracking-wider">
+              <th className="pb-3 md:pb-4 font-semibold w-[22%]">{colName}</th>
+              <th className="pb-3 md:pb-4 font-semibold w-[18%]">
+                {labels.price}
+              </th>
+              <th className="pb-3 md:pb-4 font-semibold w-[15%]">
+                {labels.vol}
+              </th>
+              <th className="pb-3 md:pb-4 font-semibold w-[12%]">
+                {labels.unit}
+              </th>
+              <th className="pb-3 md:pb-4 font-semibold w-[15%] text-smart-lime">
                 {labels.qty}
               </th>
-              <th className="pb-4 font-semibold w-[15%]">Biaya HPP</th>
+              <th className="pb-3 md:pb-4 font-semibold w-[15%]">Biaya HPP</th>
               <th></th>
             </tr>
           </thead>
@@ -65,7 +73,7 @@ const TableGroup = ({
                   key={row.id}
                   className="group transition-colors hover:bg-smart-border/30"
                 >
-                  <td className="py-4 pr-2">
+                  <td className="py-3 md:py-4 pr-2">
                     <input
                       type="text"
                       placeholder="Ketik nama item..."
@@ -73,11 +81,11 @@ const TableGroup = ({
                       onChange={(e) =>
                         updateRow(type, row.id, "name", e.target.value)
                       }
-                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
                     />
                   </td>
-                  <td className="py-4 pr-2 relative">
-                    <span className="absolute left-3 top-6 text-smart-text-muted text-xs font-bold">
+                  <td className="py-3 md:py-4 pr-2 relative">
+                    <span className="absolute left-3 top-5 md:top-6 text-smart-text-muted text-[10px] md:text-xs font-bold">
                       Rp
                     </span>
                     <input
@@ -89,10 +97,10 @@ const TableGroup = ({
                       onChange={(e) =>
                         updateRow(type, row.id, "totalPrice", e.target.value)
                       }
-                      className="w-full bg-smart-bg border border-smart-border rounded-lg pl-8 pr-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg pl-8 pr-3 py-2 md:py-2.5 text-xs md:text-sm text-smart-text focus:border-smart-lime outline-none transition-all"
                     />
                   </td>
-                  <td className="py-4 pr-2 relative">
+                  <td className="py-3 md:py-4 pr-2 relative">
                     <input
                       type="number"
                       min="0"
@@ -102,17 +110,17 @@ const TableGroup = ({
                       onChange={(e) =>
                         updateRow(type, row.id, "totalVolume", e.target.value)
                       }
-                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all pr-8"
+                      className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm text-smart-text focus:border-smart-lime outline-none transition-all pr-8"
                     />
                   </td>
-                  <td className="py-4 pr-2">
+                  <td className="py-3 md:py-4 pr-2">
                     <div className="relative">
                       <select
                         value={row.unit}
                         onChange={(e) =>
                           updateRow(type, row.id, "unit", e.target.value)
                         }
-                        className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2.5 text-sm text-smart-text focus:border-smart-lime outline-none transition-all appearance-none cursor-pointer"
+                        className="w-full bg-smart-bg border border-smart-border rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm text-smart-text focus:border-smart-lime outline-none transition-all appearance-none cursor-pointer"
                       >
                         {units.map((u) => (
                           <option key={u} value={u}>
@@ -120,12 +128,12 @@ const TableGroup = ({
                           </option>
                         ))}
                       </select>
-                      <span className="material-icons-round absolute right-1 top-2.5 text-smart-text-muted pointer-events-none text-lg">
+                      <span className="material-icons-round absolute right-1 top-1.5 md:top-2.5 text-smart-text-muted pointer-events-none text-base md:text-lg">
                         arrow_drop_down
                       </span>
                     </div>
                   </td>
-                  <td className="py-4 pr-2 relative">
+                  <td className="py-3 md:py-4 pr-2 relative">
                     <input
                       type="number"
                       min="0"
@@ -135,29 +143,29 @@ const TableGroup = ({
                       onChange={(e) =>
                         updateRow(type, row.id, "recipeQty", e.target.value)
                       }
-                      className="w-full bg-smart-lime/10 border border-smart-lime/50 rounded-lg px-3 py-2.5 text-sm text-smart-lime font-bold focus:border-smart-lime outline-none transition-all placeholder-smart-lime/30 pr-8"
+                      className="w-full bg-smart-lime/10 border border-smart-lime/50 rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm text-smart-lime font-bold focus:border-smart-lime outline-none transition-all placeholder-smart-lime/30 pr-8"
                     />
-                    <span className="absolute right-4 top-6 text-smart-lime/60 text-[10px] font-bold uppercase pointer-events-none">
+                    <span className="absolute right-4 top-5 md:top-6 text-smart-lime/60 text-[8px] md:text-[10px] font-bold uppercase pointer-events-none">
                       {row.unit}
                     </span>
                   </td>
-                  <td className="py-4 pr-2">
+                  <td className="py-3 md:py-4 pr-2">
                     <div className="flex flex-col">
-                      <span className="font-bold text-sm text-smart-text">
+                      <span className="font-bold text-xs md:text-sm text-smart-text whitespace-nowrap">
                         {formatRp(getRowCost(row))}
                       </span>
-                      <span className="text-[10px] text-smart-text-muted font-medium">
+                      <span className="text-[9px] md:text-[10px] text-smart-text-muted font-medium whitespace-nowrap mt-0.5">
                         @ {formatRp(unitPrice)} / {row.unit}
                       </span>
                     </div>
                   </td>
-                  <td className="py-4 text-right">
+                  <td className="py-3 md:py-4 text-right">
                     <button
                       onClick={() => removeRow(type, row.id)}
-                      className="text-smart-text-muted hover:text-red-500 p-2 rounded-lg transition-colors"
+                      className="text-smart-text-muted hover:text-red-500 p-1.5 md:p-2 rounded-lg transition-colors"
                       title="Hapus Baris"
                     >
-                      <span className="material-icons-round text-lg">
+                      <span className="material-icons-round text-base md:text-lg">
                         delete_outline
                       </span>
                     </button>
@@ -170,7 +178,7 @@ const TableGroup = ({
       </div>
       <button
         onClick={() => addRow(type)}
-        className="mt-2 bg-smart-bg border border-dashed border-smart-text-muted text-sm font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 hover:border-smart-lime hover:text-smart-lime text-smart-text transition-colors w-full sm:w-auto justify-center"
+        className="mt-2 bg-smart-bg border border-dashed border-smart-text-muted text-xs md:text-sm font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-xl flex items-center gap-2 hover:border-smart-lime hover:text-smart-lime text-smart-text transition-colors w-full sm:w-auto justify-center"
       >
         <span className="material-icons-round text-sm">add</span> Tambah Baris
       </button>
@@ -634,25 +642,26 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
   };
 
   return (
-    <div className="animate-fade-in w-full max-w-7xl mx-auto pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+    <div className="animate-fade-in w-full max-w-7xl mx-auto pb-16 md:pb-20">
+      {/* HEADER & SELECTOR */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-5 md:gap-6 mb-6 md:mb-8">
         <div>
-          <h2 className="font-montserrat font-bold text-3xl md:text-4xl text-smart-text mb-2 transition-colors duration-300">
+          <h2 className="font-montserrat font-bold text-2xl sm:text-3xl md:text-4xl text-smart-text mb-2 transition-colors duration-300">
             Kalkulator HPP Cerdas
           </h2>
-          <p className="text-smart-text-muted text-sm md:text-base">
+          <p className="text-smart-text-muted text-xs sm:text-sm md:text-base">
             Dilengkapi 3 Komponen Akuntansi Pabrik & Logika Produksi.
           </p>
         </div>
 
-        <div className="bg-smart-card border border-smart-border rounded-2xl px-5 py-3 flex items-center shadow-lg hover:border-smart-text-muted transition-colors duration-300">
-          <span className="text-sm text-smart-text-muted mr-3 font-medium">
+        <div className="bg-smart-card border border-smart-border rounded-xl md:rounded-2xl px-4 md:px-5 py-2.5 md:py-3 flex items-center shadow-lg hover:border-smart-text-muted transition-colors duration-300 w-full md:w-auto">
+          <span className="text-xs md:text-sm text-smart-text-muted mr-2 md:mr-3 font-medium whitespace-nowrap">
             Tipe Bisnis:
           </span>
           <select
             value={businessType}
             onChange={handleTypeChange}
-            className="bg-transparent text-sm font-bold text-smart-text focus:outline-none cursor-pointer appearance-none pr-4 transition-colors"
+            className="bg-transparent text-xs md:text-sm font-bold text-smart-text focus:outline-none cursor-pointer appearance-none pr-4 md:pr-6 transition-colors w-full"
           >
             <option value="produksi" className="bg-smart-bg">
               Produksi (F&B / Kriya)
@@ -664,32 +673,33 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
               Jasa & Pelayanan
             </option>
           </select>
-          <span className="material-icons-round text-smart-text-muted pointer-events-none text-sm">
+          <span className="material-icons-round text-smart-text-muted pointer-events-none text-sm md:text-base absolute right-5 md:relative md:right-0">
             expand_more
           </span>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-smart-card to-smart-bg border border-smart-lime/40 p-6 md:p-8 rounded-[2rem] shadow-2xl mb-8 relative overflow-hidden transition-colors duration-300">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-smart-lime/5 rounded-bl-full pointer-events-none"></div>
-        <h3 className="font-montserrat font-bold text-xl text-smart-lime mb-4 flex items-center gap-2">
+      {/* PANDUAN BOX */}
+      <div className="bg-gradient-to-br from-smart-card to-smart-bg border border-smart-lime/40 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl mb-6 md:mb-8 relative overflow-hidden transition-colors duration-300">
+        <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-smart-lime/5 rounded-bl-full pointer-events-none"></div>
+        <h3 className="font-montserrat font-bold text-lg md:text-xl text-smart-lime mb-3 md:mb-4 flex items-center gap-2">
           <span className="material-icons-round">lightbulb</span> Panduan
-          Pengisian Otomatis
+          Pengisian
         </h3>
-        <p className="text-smart-text text-sm leading-relaxed mb-6 opacity-90">
+        <p className="text-smart-text text-xs md:text-sm leading-relaxed mb-5 md:mb-6 opacity-90">
           <strong>Rahasia SmartHPP:</strong> Anda tidak perlu menghitung harga
           satuan memakai kalkulator! Cukup masukkan{" "}
           <span className="font-bold underline decoration-smart-lime underline-offset-4">
-            Harga Total sesuai di Nota Belanja
+            Harga Total sesuai di Nota
           </span>
           . Sistem kami yang akan memecahnya secara otomatis.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <div className="bg-smart-border/30 p-4 rounded-xl border border-smart-border">
             <h4 className="font-bold text-smart-text text-sm mb-2">
               {currentConf.mainTitle}
             </h4>
-            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+            <ul className="text-xs text-smart-text-muted space-y-1.5 md:space-y-2 list-disc pl-4">
               <li>
                 <strong>{currentConf.mainLabels.price}:</strong> Uang yang Anda
                 bayarkan ke kasir.
@@ -700,10 +710,7 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
               </li>
               <li>
                 <strong>{currentConf.mainLabels.qty}:</strong> Berapa yang
-                dipakai untuk resep/pesanan ini saja. <br />
-                <span className="text-smart-lime italic">
-                  (Bisa ketik desimal/koma misal 1.5)
-                </span>
+                dipakai untuk resep/pesanan ini saja.
               </li>
             </ul>
           </div>
@@ -711,7 +718,7 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
             <h4 className="font-bold text-smart-text text-sm mb-2">
               {currentConf.laborTitle}
             </h4>
-            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+            <ul className="text-xs text-smart-text-muted space-y-1.5 md:space-y-2 list-disc pl-4">
               <li>
                 <strong>{currentConf.laborLabels.price}:</strong> Gaji pekerja
                 secara utuh (Harian/Bulanan).
@@ -722,7 +729,7 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
               </li>
               <li>
                 <strong>{currentConf.laborLabels.qty}:</strong> Durasi yang
-                dihabiskan untuk melayani 1 order ini.
+                dihabiskan untuk melayani 1 order.
               </li>
             </ul>
           </div>
@@ -730,38 +737,39 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
             <h4 className="font-bold text-smart-text text-sm mb-2">
               {currentConf.otherTitle}
             </h4>
-            <ul className="text-xs text-smart-text-muted space-y-2 list-disc pl-4">
+            <ul className="text-xs text-smart-text-muted space-y-1.5 md:space-y-2 list-disc pl-4">
               <li>
                 <strong>{currentConf.otherLabels.price}:</strong> Total tagihan
                 (Cth: Beli Listrik Rp 20.000).
               </li>
               <li>
                 <strong>{currentConf.otherLabels.vol}:</strong> Kuota itu
-                kira-kira habis untuk berapa Pcs/Porsi?
+                kira-kira habis untuk berapa Porsi?
               </li>
               <li>
                 <strong>{currentConf.otherLabels.qty}:</strong> Ketik 1, agar
-                beban dibagi rata ke tiap Pcs/Porsi.
+                beban dibagi rata ke tiap Porsi.
               </li>
             </ul>
           </div>
         </div>
         {businessType === "produksi" && (
-          <div className="mt-6 bg-smart-lime/10 p-4 rounded-xl border border-smart-lime/20 text-sm">
+          <div className="mt-5 md:mt-6 bg-smart-lime/10 p-3 md:p-4 rounded-xl border border-smart-lime/20 text-xs md:text-sm">
             <strong className="text-smart-lime">
-              💡 Tips "Jumlah Produk Dihasilkan":
+              💡 Tips "Jumlah Produk":
             </strong>{" "}
-            Karena Anda di mode Produksi, wajar jika tabel diisi dengan modal
-            besar (1 batch/resep besar). Nanti, masukkan "Jumlah Produk" di
-            panel sebelah kanan agar sistem membaginya menjadi Harga Per
-            Pcs/Porsi.
+            Wajar jika tabel diisi dengan modal 1 batch besar. Nanti, masukkan
+            "Jumlah Produk" di panel sebelah agar sistem membaginya menjadi
+            Harga Per Pcs.
           </div>
         )}
       </div>
 
       {!isLoggedIn && (
-        <div className="bg-smart-lime/10 border border-smart-lime/30 text-smart-lime px-6 py-4 rounded-2xl mb-8 flex items-start md:items-center gap-4 text-sm md:text-base font-medium">
-          <span className="material-icons-round text-2xl">info</span>
+        <div className="bg-smart-lime/10 border border-smart-lime/30 text-smart-lime px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl mb-6 md:mb-8 flex items-start gap-3 md:gap-4 text-xs sm:text-sm md:text-base font-medium">
+          <span className="material-icons-round text-xl md:text-2xl mt-0.5 md:mt-0">
+            info
+          </span>
           <p className="leading-relaxed">
             Mode Simulasi. Anda bisa menghitung HPP secara bebas, namun data
             tidak akan tersimpan permanen sebelum{" "}
@@ -776,18 +784,20 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 flex flex-col gap-6">
-          <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl transition-colors duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* GRID UTAMA (KIRI: TABEL, KANAN: PANEL HASIL) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
+        {/* SISI KIRI (TABEL PENGISIAN) */}
+        <div className="xl:col-span-2 flex flex-col gap-5 md:gap-6">
+          <div className="bg-smart-card border border-smart-border p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl transition-colors duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
               <div>
-                <label className="block text-xs font-bold text-smart-text-muted mb-2 uppercase tracking-wider">
+                <label className="block text-[10px] md:text-xs font-bold text-smart-text-muted mb-1.5 md:mb-2 uppercase tracking-wider">
                   Edit Produk Eksis
                 </label>
                 <select
                   value={selectedProductId}
                   onChange={(e) => handleProductSelect(e.target.value)}
-                  className="w-full bg-smart-bg border border-smart-border rounded-xl px-4 py-4 text-sm font-bold text-smart-text focus:border-smart-lime outline-none"
+                  className="w-full bg-smart-bg border border-smart-border rounded-xl px-4 py-3 md:py-4 text-sm font-bold text-smart-text focus:border-smart-lime outline-none"
                 >
                   <option value="new">-- Tambah Produk Baru --</option>
                   {existingProducts.map((p) => (
@@ -798,7 +808,7 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-smart-text-muted mb-2 uppercase tracking-wider">
+                <label className="block text-[10px] md:text-xs font-bold text-smart-text-muted mb-1.5 md:mb-2 uppercase tracking-wider">
                   Nama Resep / Layanan
                 </label>
                 <input
@@ -806,7 +816,7 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                   placeholder={currentConf.inputPlaceholder}
-                  className="w-full bg-smart-bg border border-smart-border rounded-xl px-5 py-4 text-sm font-bold focus:border-smart-lime text-smart-text transition-all"
+                  className="w-full bg-smart-bg border border-smart-border rounded-xl px-4 py-3 md:py-4 text-sm font-bold focus:border-smart-lime text-smart-text transition-all"
                 />
               </div>
             </div>
@@ -856,19 +866,20 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
           />
         </div>
 
-        <div className="bg-smart-card border border-smart-border p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col h-fit sticky top-8 transition-colors duration-300">
+        {/* SISI KANAN (PANEL HASIL & SIMPAN) */}
+        <div className="bg-smart-card border border-smart-border p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-xl flex flex-col h-fit lg:sticky lg:top-28 transition-colors duration-300">
           {businessType === "produksi" && (
-            <div className="mb-6 pb-6 border-b border-smart-border">
-              <h3 className="text-smart-text-muted text-xs font-semibold mb-2 uppercase tracking-widest">
+            <div className="mb-5 md:mb-6 pb-5 md:pb-6 border-b border-smart-border">
+              <h3 className="text-smart-text-muted text-[10px] md:text-xs font-semibold mb-1.5 md:mb-2 uppercase tracking-widest">
                 Total Modal Keseluruhan
               </h3>
-              <p className="text-smart-text font-black text-2xl mb-5">
+              <p className="text-smart-text font-black text-xl md:text-2xl mb-4 md:mb-5">
                 {formatRp(grandTotalBatch)}
               </p>
-              <label className="block text-sm font-bold text-smart-lime mb-3 tracking-wide flex items-center justify-between">
-                Jumlah Produk yang Dihasilkan
+              <label className="block text-xs md:text-sm font-bold text-smart-lime mb-2 md:mb-3 tracking-wide flex items-center justify-between">
+                Jml Produk Dihasilkan
                 <span
-                  className="material-icons-round text-smart-lime text-sm cursor-help"
+                  className="material-icons-round text-smart-lime text-base cursor-help"
                   title="Masukkan berapa banyak produk yang jadi dari resep di atas"
                 >
                   info
@@ -881,55 +892,55 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
                   step="any"
                   value={yieldQty}
                   onChange={(e) => setYieldQty(e.target.value)}
-                  className="w-2/3 bg-smart-lime/10 border border-smart-lime/50 rounded-xl px-4 py-3 text-lg font-bold text-smart-lime focus:outline-none transition-all"
+                  className="w-2/3 bg-smart-lime/10 border border-smart-lime/50 rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-base md:text-lg font-bold text-smart-lime focus:outline-none transition-all"
                 />
                 <input
                   type="text"
                   value={yieldUnit}
                   onChange={(e) => setYieldUnit(e.target.value)}
-                  className="w-1/3 bg-smart-bg border border-smart-border rounded-xl px-3 py-3 text-sm font-bold text-smart-text focus:outline-none text-center"
+                  className="w-1/3 bg-smart-bg border border-smart-border rounded-xl px-2 md:px-3 py-2.5 md:py-3 text-xs md:text-sm font-bold text-smart-text focus:outline-none text-center"
                 />
               </div>
             </div>
           )}
 
-          <h3 className="text-smart-text-muted text-xs font-semibold mb-1 uppercase tracking-widest">
+          <h3 className="text-smart-text-muted text-[10px] md:text-xs font-semibold mb-1 uppercase tracking-widest">
             Modal HPP per {yieldUnit}
           </h3>
-          <h2 className="font-montserrat font-extrabold text-4xl md:text-5xl text-smart-text mb-8">
+          <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl md:text-5xl text-smart-text mb-6 md:mb-8 truncate">
             {formatRp(totalHppPerUnit)}
           </h2>
 
-          <div className="mb-8">
-            <h4 className="font-montserrat font-bold text-sm mb-4 text-smart-text">
-              Rekomendasi Harga Jual (Markup)
+          <div className="mb-6 md:mb-8">
+            <h4 className="font-montserrat font-bold text-xs md:text-sm mb-3 md:mb-4 text-smart-text">
+              Rekomendasi Harga Jual
             </h4>
-            <div className="space-y-3">
-              <div className="bg-smart-bg border border-smart-border rounded-xl p-4 flex justify-between items-center group hover:border-blue-400/50 transition-colors">
-                <span className="font-bold text-sm text-smart-text">
+            <div className="space-y-2 md:space-y-3">
+              <div className="bg-smart-bg border border-smart-border rounded-xl p-3 md:p-4 flex justify-between items-center group hover:border-blue-400/50 transition-colors">
+                <span className="font-bold text-xs md:text-sm text-smart-text">
                   {formatRp(margin30)}
                 </span>
-                <span className="text-xs text-smart-text-muted">
+                <span className="text-[10px] md:text-xs text-smart-text-muted">
                   (Untung 30%)
                 </span>
               </div>
-              <div className="bg-smart-bg border border-smart-lime/40 rounded-xl p-4 flex justify-between items-center group hover:border-smart-lime transition-colors">
-                <span className="font-bold text-sm text-smart-lime">
+              <div className="bg-smart-bg border border-smart-lime/40 rounded-xl p-3 md:p-4 flex justify-between items-center group hover:border-smart-lime transition-colors">
+                <span className="font-bold text-xs md:text-sm text-smart-lime">
                   {formatRp(margin40)}
                 </span>
-                <span className="text-xs font-bold text-smart-lime/80">
+                <span className="text-[10px] md:text-xs font-bold text-smart-lime/80">
                   ⭐ (Ideal 40%)
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="mb-8">
-            <h4 className="font-montserrat font-bold text-sm mb-3 text-smart-text">
+          <div className="mb-6 md:mb-8">
+            <h4 className="font-montserrat font-bold text-xs md:text-sm mb-2 md:mb-3 text-smart-text">
               Keputusan Harga Jual Anda
             </h4>
             <div className="relative">
-              <span className="absolute left-4 top-4 text-smart-text-muted font-bold">
+              <span className="absolute left-4 top-3.5 md:top-4 text-smart-text-muted font-bold text-sm md:text-base">
                 Rp
               </span>
               <input
@@ -938,40 +949,43 @@ export default function HppSection({ isLoggedIn = false, openModal }) {
                 value={sellingPrice}
                 onChange={(e) => setSellingPrice(e.target.value)}
                 placeholder="0"
-                className="w-full bg-smart-bg border border-smart-border rounded-xl pl-12 pr-4 py-4 text-lg font-bold focus:outline-none focus:ring-1 focus:ring-smart-lime focus:border-smart-lime text-smart-text mb-2 transition-all"
+                className="w-full bg-smart-bg border border-smart-border rounded-xl pl-12 pr-4 py-3 md:py-4 text-base md:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-smart-lime focus:border-smart-lime text-smart-text transition-all"
               />
             </div>
           </div>
 
-          <div className="mb-8 border-t border-smart-border pt-6">
-            <h4 className="text-sm font-semibold text-smart-text-muted mb-2">
+          <div className="mb-6 md:mb-8 border-t border-smart-border pt-5 md:pt-6">
+            <h4 className="text-xs md:text-sm font-semibold text-smart-text-muted mb-1 md:mb-2">
               Laba Bersih per {yieldUnit}:
             </h4>
             <h3
-              className={`font-montserrat font-bold text-2xl md:text-3xl tracking-tight ${sellingPrice === "" ? "text-smart-text-muted" : labaBersih >= 0 ? "text-smart-lime" : "text-red-500"}`}
+              className={`font-montserrat font-bold text-xl sm:text-2xl md:text-3xl tracking-tight ${sellingPrice === "" ? "text-smart-text-muted" : labaBersih >= 0 ? "text-smart-lime" : "text-red-500"}`}
             >
               {formatRp(labaBersih)}
             </h3>
           </div>
 
+          {/* TOMBOL AKSI */}
           <div className="flex flex-col gap-3 mt-auto">
             <button
               onClick={handleSave}
-              className="w-full bg-smart-lime text-smart-dark font-extrabold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-[0_4px_20px_rgba(212,245,66,0.3)] text-base flex justify-center items-center gap-2"
+              className="w-full bg-smart-lime text-smart-dark font-extrabold py-3.5 md:py-4 rounded-xl md:rounded-2xl hover:scale-[1.02] transition-transform shadow-[0_4px_20px_rgba(212,245,66,0.3)] text-sm md:text-base flex justify-center items-center gap-2"
             >
-              <span className="material-icons-round">cloud_done</span>{" "}
+              <span className="material-icons-round text-lg md:text-xl">
+                cloud_done
+              </span>{" "}
               {selectedProductId === "new"
                 ? "Simpan Produk"
                 : "Perbarui Produk"}
             </button>
 
-            {/* TOMBOL HAPUS MUNCUL HANYA SAAT EDIT PRODUK */}
+            {/* TOMBOL HAPUS */}
             {selectedProductId !== "new" && (
               <button
                 onClick={handleDelete}
-                className="w-full bg-transparent border border-red-500/50 text-red-500 font-bold py-3 rounded-xl hover:bg-red-500 hover:text-white transition-colors text-sm flex justify-center items-center gap-2"
+                className="w-full bg-transparent border border-red-500/50 text-red-500 font-bold py-2.5 md:py-3 rounded-xl md:rounded-2xl hover:bg-red-500 hover:text-white transition-colors text-xs md:text-sm flex justify-center items-center gap-2"
               >
-                <span className="material-icons-round text-sm">
+                <span className="material-icons-round text-sm md:text-base">
                   delete_forever
                 </span>{" "}
                 Hapus Produk Ini

@@ -1,59 +1,71 @@
 @import "tailwindcss";
 
 @theme {
-  /* Variabel Dinamis Tailwind v4 */
   --color-smart-bg: var(--bg-primary);
   --color-smart-card: var(--bg-secondary);
   --color-smart-card-hover: var(--bg-tertiary);
   --color-smart-border: var(--border-color);
   --color-smart-text: var(--text-primary);
   --color-smart-text-muted: var(--text-muted);
-  
-  /* Aksen Warna Berubah Sesuai Tema */
+
   --color-smart-lime: var(--accent-lime);
   --color-smart-lime-hover: var(--accent-lime-hover);
-  --color-smart-dark: var(--text-on-accent); /* Teks dalam tombol menyesuaikan background */
-  
-  --font-sans: 'Open Sans', sans-serif;
-  --font-montserrat: 'Montserrat', sans-serif;
+  --color-smart-dark: var(--text-on-accent);
+
+  --font-sans: "Open Sans", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
 }
 
 :root {
-  /* TEMA GELAP (DEFAULT) - Estetika Dark/Glassmorphism */
-  --bg-primary: #101218;      
-  --bg-secondary: #1A1C23;    
+  --bg-primary: #101218;
+  --bg-secondary: #1a1c23;
   --bg-tertiary: #232836;
-  --border-color: #2D303E;    
-  --text-primary: #FFFFFF;    
-  --text-muted: #9CA3AF;      
-  
-  /* Aksen Warna Gelap: Hijau Cerah & Teks Hitam */
-  --accent-lime: #D4F542;
-  --accent-lime-hover: #C1DF3A;
+  --border-color: #2d303e;
+  --text-primary: #ffffff;
+  --text-muted: #9ca3af;
+
+  --accent-lime: #d4f542;
+  --accent-lime-hover: #c1df3a;
   --accent-shadow: rgba(212, 245, 66, 0.5);
-  --text-on-accent: #0B0D12;
+  --text-on-accent: #0b0d12;
 }
 
 .light {
-  /* TEMA TERANG (Kondisi Aktif) */
-  --bg-primary: #F8FAFC;      
-  --bg-secondary: #FFFFFF;    
-  --bg-tertiary: #F1F5F9;     
-  --border-color: #E2E8F0;    
-  --text-primary: #0F172A;    
-  --text-muted: #64748B;      
-  
-  /* Aksen Warna Terang: Hijau Tua & Teks Putih */
-  --accent-lime: #15803D;      /* Tailwind green-700 */
-  --accent-lime-hover: #166534; /* Tailwind green-800 */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+
+  --accent-lime: #15803d;
+  --accent-lime-hover: #166534;
   --accent-shadow: rgba(21, 128, 61, 0.5);
-  --text-on-accent: #FFFFFF;
+  --text-on-accent: #ffffff;
 }
 
-/* Custom Scrollbar Dinamis */
+/* ========================================== */
+/* PENGATURAN RESPONSIVE GLOBAL & MOBILE UX   */
+/* ========================================== */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden; 
+  -webkit-tap-highlight-color: transparent; 
+  scroll-behavior: smooth;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px; 
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
@@ -71,23 +83,22 @@
   backdrop-filter: blur(5px);
 }
 
-/* Range Slider */
-input[type=range] {
+input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
   background: transparent;
 }
-input[type=range]::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 18px;
-  width: 18px;
+  height: 24px; 
+  width: 24px; 
   border-radius: 50%;
   background: var(--color-smart-lime);
   cursor: pointer;
-  margin-top: -7px;
-  box-shadow: 0 0 10px var(--accent-shadow); /* Shadow mengikuti warna aksen */
+  margin-top: -10px; 
+  box-shadow: 0 0 12px var(--accent-shadow);
 }
-input[type=range]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
   cursor: pointer;
@@ -96,8 +107,14 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;

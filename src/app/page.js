@@ -23,7 +23,9 @@ export default function Home() {
     });
 
     // Dengarkan perubahan status login (misal setelah redirect dari Google)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
       if (session && currentView === "landing") {
         navigate("dashboard");
@@ -37,14 +39,17 @@ export default function Home() {
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   const openModal = (modalName) => setActiveModal(modalName);
   const closeModal = () => setActiveModal(null);
 
   // --- FUNGSI AUTENTIKASI SUPABASE ---
 
   const doLogin = async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw error;
     closeModal();
   };
@@ -52,11 +57,15 @@ export default function Home() {
   const doRegister = async (email, password) => {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
-    alert("Berhasil mendaftar! Silakan login (atau cek email konfirmasi jika RLS mengharuskan verifikasi).");
+    alert(
+      "Berhasil mendaftar! Silakan login (atau cek email konfirmasi jika RLS mengharuskan verifikasi).",
+    );
   };
 
   const doGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
     if (error) alert("Gagal login dengan Google: " + error.message);
     // Catatan: Google Auth akan me-refresh halaman, jadi closeModal tidak diperlukan di sini
   };
@@ -78,15 +87,34 @@ export default function Home() {
         openModal={openModal}
       />
 
-      <main className={`flex-grow w-full relative ${currentView === "landing" ? "" : "pt-28 px-4 md:px-8"}`}>
-        {currentView === "landing" && <LandingSection navigate={navigate} openModal={openModal} />}
-        {currentView === "dashboard" && <DashboardSection isLoggedIn={isLoggedIn} openModal={openModal} navigate={navigate} />}
-        {currentView === "hpp" && <HppSection isLoggedIn={isLoggedIn} openModal={openModal} />}
-        {currentView === "keuangan" && <KeuanganSection isLoggedIn={isLoggedIn} openModal={openModal} />}
+      {/* PENINGKATAN RESPONSIVE: Padding dinamis (pt-24 untuk mobile, pt-28 untuk desktop) */}
+      <main
+        className={`flex-grow w-full relative ${currentView === "landing" ? "" : "pt-24 md:pt-28 px-4 sm:px-6 md:px-8 lg:px-12"}`}
+      >
+        {currentView === "landing" && (
+          <LandingSection navigate={navigate} openModal={openModal} />
+        )}
+        {currentView === "dashboard" && (
+          <DashboardSection
+            isLoggedIn={isLoggedIn}
+            openModal={openModal}
+            navigate={navigate}
+          />
+        )}
+        {currentView === "hpp" && (
+          <HppSection isLoggedIn={isLoggedIn} openModal={openModal} />
+        )}
+        {currentView === "keuangan" && (
+          <KeuanganSection isLoggedIn={isLoggedIn} openModal={openModal} />
+        )}
         {currentView === "faq" && <FaqSection />}
       </main>
 
-      <Footer isLoggedIn={isLoggedIn} openModal={openModal} navigate={navigate} />
+      <Footer
+        isLoggedIn={isLoggedIn}
+        openModal={openModal}
+        navigate={navigate}
+      />
 
       <Modals
         activeModal={activeModal}

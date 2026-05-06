@@ -1,31 +1,31 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
     // Ambil tema dari storage, default ke dark
-    const savedTheme = localStorage.getItem('smarthpp-theme') || 'dark';
+    const savedTheme = localStorage.getItem("smarthpp-theme") || "dark";
     setTheme(savedTheme);
-    if (savedTheme === 'light') {
-      document.documentElement.classList.add('light');
+    if (savedTheme === "light") {
+      document.documentElement.classList.add("light");
     } else {
-      document.documentElement.classList.remove('light');
+      document.documentElement.classList.remove("light");
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-    localStorage.setItem('smarthpp-theme', newTheme);
-    
-    if (newTheme === 'light') {
-      document.documentElement.classList.add('light');
+    localStorage.setItem("smarthpp-theme", newTheme);
+
+    if (newTheme === "light") {
+      document.documentElement.classList.add("light");
     } else {
-      document.documentElement.classList.remove('light');
+      document.documentElement.classList.remove("light");
     }
   };
 
